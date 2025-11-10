@@ -1,0 +1,54 @@
+<div class="bg-gray-900 min-h-screen text-white p-8 flex flex-col items-center font-sans">
+
+  <h1 class="text-3xl font-bold mb-6">Capture de Carte</h1>
+  <p class="text-lg text-gray-400 mb-6">Pointez votre webcam vers la carte et cliquez sur "Capturer".</p>
+
+  <div class="w-full max-w-lg bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+
+    <!-- Conteneur pour la vidéo et le canvas -->
+    <div class="relative w-full aspect-video">
+      <!-- Le flux vidéo de la webcam -->
+      <video #videoElement
+             class="w-full h-full object-cover"
+             autoplay
+             playsinline
+             muted>
+      </video>
+
+      <!-- Le canvas est caché. Il ne sert qu'à capturer l'image en coulisse. -->
+      <canvas #canvasElement class="hidden"></canvas>
+    </div>
+
+    <!-- Section des contrôles -->
+    <div class="p-6">
+      <!-- Affichage d'une erreur si la webcam échoue -->
+      @if (errorMessage()) {
+        <div class="bg-red-800 border border-red-600 text-red-200 p-3 rounded-lg text-center">
+          <span class="font-semibold">Erreur :</span> {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Bouton de capture -->
+      <button (click)="capture()"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold
+                     py-3 px-6 rounded-lg text-lg
+                     transition-colors duration-200 ease-in-out
+                     focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
+                     shadow-lg disabled:opacity-50"
+              [disabled]="!!errorMessage()">
+        Capturer l'image
+      </button>
+    </div>
+  </div>
+
+  <!-- Section pour afficher l'image capturée -->
+  @if (capturedImage()) {
+    <div class="mt-8 w-full max-w-lg">
+      <h2 class="text-2xl font-semibold mb-4 text-center">Image Capturée :</h2>
+      <img [src]="capturedImage()"
+           alt="Image capturée"
+           class="rounded-lg shadow-lg border-4 border-gray-700 w-full" />
+    </div>
+  }
+
+</div>
