@@ -1,18 +1,52 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TensorflowService, DetectionResult } from '../../services/tensorFlow.service'; // Assurez-vous du chemin
+import { TensorflowService } from '../../services/tensorFlow.service'; // Assurez-vous du chemin
 
-// Classes du modèle d'analyse de cartes (selon votre metadata.yaml du second modèle)
+// Classes du modèle d'analyse de cartes (Mise à jour pour les 43 classes du metadata.yaml)
 const ELEMENT_CLASS_NAMES = [
-  'blue_card', // 0
-  'chimera',   // 1
-  'gem',       // 2
-  'green_card', // 3
-  'hint',      // 4
-  'night',     // 5
-  'red_card',  // 6
-  'thistle',   // 7
-  'yellow_card' // 8
+  'card_blue', // 0
+  'card_green', // 1
+  'card_red', // 2
+  'card_yellow', // 3
+  'chimera', // 4
+  'condition_chimera', // 5
+  'condition_gem', // 6
+  'condition_thistle', // 7
+  'each_all_colors', // 8
+  'each_blue', // 9
+  'each_chimera', // 10
+  'each_gem', // 11
+  'each_green', // 12
+  'each_hint', // 13
+  'each_night', // 14
+  'each_red', // 15
+  'each_thistle', // 16
+  'each_yellow_or_blue', // 17
+  'each_yellow_or_green', // 18
+  'each_yellow_or_red', // 19
+  'gem', // 20
+  'hint', // 21
+  'night', // 22
+  'thistle', // 23
+  'value_1', // 24
+  'value_10', // 25
+  'value_12', // 26
+  'value_13', // 27
+  'value_14', // 28
+  'value_15', // 29
+  'value_16', // 30
+  'value_17', // 31
+  'value_18', // 32
+  'value_19', // 33
+  'value_2', // 34
+  'value_20', // 35
+  'value_24', // 36
+  'value_3', // 37
+  'value_4', // 38
+  'value_5', // 39
+  'value_7', // 40
+  'value_8', // 41
+  'value_9' // 42
 ];
 
 // Interface pour stocker les résultats de l'analyse
@@ -26,34 +60,7 @@ interface ElementDetection {
   selector: 'app-card',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="flex flex-col items-center bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200">
-
-      <img #cardImage
-           [src]="cardUrl"
-           alt="Carte découpée"
-           (load)="analyzeCard(cardImage)"
-           class="max-h-32 shadow-lg border-2 border-indigo-300 rounded-lg object-contain mb-2"
-           crossOrigin="anonymous"
-      >
-
-      <div *ngIf="!isLoading()" class="text-xs w-full">
-        <p *ngIf="analyzedElements().length === 0" class="text-red-500 font-semibold text-center">
-            Aucun élément trouvé (&lt; 20%)
-        </p>
-        <div *ngFor="let element of analyzedElements()" class="flex justify-between items-center my-0.5">
-          <span class="font-medium text-gray-700">{{ element.className | slice:0:15 }}</span>
-          <span class="font-bold" [ngClass]="{'text-green-600': element.score > 0.5, 'text-orange-500': element.score <= 0.5}">
-            {{ (element.score * 100) | number:'1.0-0' }}%
-          </span>
-        </div>
-      </div>
-
-      <div *ngIf="isLoading()" class="text-xs text-indigo-600 font-medium py-3">
-        Analyse...
-      </div>
-    </div>
-  `,
+  templateUrl: './card.html',
   styles: []
 })
 export class Card {
@@ -91,6 +98,7 @@ export class Card {
           const classId = results.classes[i];
           const score = results.scores[i];
 
+          // Le tableau ELEMENT_CLASS_NAMES est mis à jour et peut contenir jusqu'à 43 indices (0 à 42)
           if (ELEMENT_CLASS_NAMES[classId]) {
             elements.push({
               className: ELEMENT_CLASS_NAMES[classId],
