@@ -1,8 +1,9 @@
 <div class="p-6 bg-gray-100 min-h-screen">
-  <h1 class="text-3xl font-bold text-center text-indigo-800 mb-6">Détecteur de Cartes (Upload)</h1>
+  <h1 class="text-3xl font-bold text-center text-indigo-800 mb-6">Détecteur de Scène & Analyse de Cartes</h1>
 
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
 
+    <!-- Contrôles d'Upload et de Chargement -->
     <div class="flex flex-col sm:flex-row gap-4 mb-6 items-center">
       <input
         type="file"
@@ -11,7 +12,6 @@
         class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
         [disabled]="isLoading()"
       >
-
       <button
         (click)="detectImage()"
         [disabled]="!imageSelected() || isLoading()"
@@ -22,14 +22,15 @@
       </button>
     </div>
 
+    <!-- Indicateur de chargement -->
     <div *ngIf="isLoading()"
-         class="loading-overlay absolute inset-0 z-20 flex flex-col items-center justify-center bg-white bg-opacity-90 rounded-xl">
-      <div class="loader text-indigo-700 text-2xl mb-4"></div>
+         class="loading-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+      <div class="loader text-indigo-700 text-2xl mb-4" style="border: 8px solid #f3f3f3; border-top: 8px solid #4f46e5; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
       <p class="text-indigo-700 text-xl font-medium">{{ loadingMessage() }}</p>
     </div>
 
-    <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50">
-
+    <!-- Zone d'affichage de l'image et des détections -->
+    <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8">
       <img #imageElement
            [src]="imageUrl()"
            alt="Image chargée pour détection"
@@ -37,35 +38,48 @@
            class="w-full h-auto object-contain"
            [ngClass]="{'hidden': !imageUrl()}"
       >
-
       <canvas #canvas
               class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-
       <div *ngIf="!imageUrl()" class="flex items-center justify-center h-64 text-gray-500">
         Veuillez sélectionner une image (JPG ou PNG).
       </div>
     </div>
 
-    <div *ngIf="croppedCards().length > 0" class="mt-8">
-      <h2 class="text-xl font-semibold text-indigo-800 mb-4">🃏 Cartes (Gauche à Droite)</h2>
-      <div class="flex flex-wrap gap-4 justify-center">
-        <img
-          *ngFor="let cardUrl of croppedCards()"
-          [src]="cardUrl"
-          class="max-h-32 shadow-lg border border-gray-200 rounded-lg object-contain"
-          alt="Carte découpée">
-      </div>
-    </div>
+    <!-- FORMULAIRE PRINCIPAL -->
+    <form [formGroup]="detectorForm">
 
-    <div *ngIf="croppedTemples().length > 0" class="mt-8">
-      <h2 class="text-xl font-semibold text-indigo-800 mb-4">🏛️ Temples</h2>
-      <div class="flex flex-wrap gap-4 justify-center">
-        <img
-          *ngFor="let templeUrl of croppedTemples()"
-          [src]="templeUrl"
-          class="max-h-32 shadow-lg border border-gray-200 rounded-lg object-contain"
-          alt="Temple découpé">
+      <!-- Section ANALYSE DE CARTES -->
+      <div *ngIf="cardsFormArray.controls.length > 0" class="mt-8">
+        <h2 class="text-xl font-semibold text-indigo-800 mb-4">🃏 Cartes (Gauche à Droite) & Analyse des Éléments</h2>
+
+        <div formArrayName="cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div *ngFor="let cardCtrl of cardsFormArray.controls; let i = index" [formGroupName]="i">
+            <app-card
+              [cardForm]="ctrlAsFormGroup(cardCtrl)"
+              [cardUrl]="croppedCards()[i].url"
+              class="w-full"
+            ></app-card>
+          </div>
+        </div>
       </div>
-    </div>
-    </div>
+
+      <!-- NOUVEAU: Section ANALYSE DES TEMPLES -->
+      <div *ngIf="templesFormArray.controls.length > 0" class="mt-8">
+        <h2 class="text-xl font-semibold text-indigo-800 mb-4">🏛️ Temples & Analyse</h2>
+
+        <div formArrayName="temples" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div *ngFor="let templeCtrl of templesFormArray.controls; let i = index" [formGroupName]="i">
+            <!-- Utilisation du nouveau composant app-temple -->
+            <app-temple
+              [templeForm]="ctrlAsFormGroup(templeCtrl)"
+              [templeUrl]="croppedTemples()[i].url"
+              class="w-full"
+            ></app-temple>
+          </div>
+        </div>
+      </div>
+
+    </form> <!-- Fin du formulaire principal -->
+
+  </div>
 </div>

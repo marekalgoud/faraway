@@ -1,126 +1,65 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TensorflowService } from '../../services/tensorFlow.service'; // Assurez-vous du chemin
+// NOUVEAUX Imports pour Reactive Forms
+import { ReactiveFormsModule, FormGroup, FormArray, FormBuilder, FormControl } from '@angular/forms';
 
-// Classes du modèle d'analyse de cartes (Mise à jour pour les 43 classes du metadata.yaml)
-const ELEMENT_CLASS_NAMES = [
-  'card_blue', // 0
-  'card_green', // 1
-  'card_red', // 2
-  'card_yellow', // 3
-  'chimera', // 4
-  'condition_chimera', // 5
-  'condition_gem', // 6
-  'condition_thistle', // 7
-  'each_all_colors', // 8
-  'each_blue', // 9
-  'each_chimera', // 10
-  'each_gem', // 11
-  'each_green', // 12
-  'each_hint', // 13
-  'each_night', // 14
-  'each_red', // 15
-  'each_thistle', // 16
-  'each_yellow_or_blue', // 17
-  'each_yellow_or_green', // 18
-  'each_yellow_or_red', // 19
-  'gem', // 20
-  'hint', // 21
-  'night', // 22
-  'thistle', // 23
-  'value_1', // 24
-  'value_10', // 25
-  'value_12', // 26
-  'value_13', // 27
-  'value_14', // 28
-  'value_15', // 29
-  'value_16', // 30
-  'value_17', // 31
-  'value_18', // 32
-  'value_19', // 33
-  'value_2', // 34
-  'value_20', // 35
-  'value_24', // 36
-  'value_3', // 37
-  'value_4', // 38
-  'value_5', // 39
-  'value_7', // 40
-  'value_8', // 41
-  'value_9' // 42
-];
-
-// Interface pour stocker les résultats de l'analyse
-interface ElementDetection {
-  className: string;
-  score: number;
-}
-
+// Classes du modèle d'analyse de cartes (pour les listes déroulantes)
+const COLOR_CLASSES = ['card_blue', 'card_green', 'card_red', 'card_yellow'];
+const VALUE_CLASSES = [
+  'value_1', 'value_10', 'value_12', 'value_13', 'value_14', 'value_15',
+  'value_16', 'value_17', 'value_18', 'value_19', 'value_2', 'value_20',
+  'value_24', 'value_3', 'value_4', 'value_5', 'value_7', 'value_8', 'value_9'
+].sort(); // Trier pour l'affichage
+const CONDITION_CLASSES = ['condition_chimera', 'condition_gem', 'condition_thistle'];
+const MULTIPLIER_CLASSES = [
+  'each_all_colors', 'each_blue', 'each_chimera', 'each_gem', 'each_green',
+  'each_hint', 'each_night', 'each_red', 'each_thistle', 'each_yellow_or_blue',
+  'each_yellow_or_green', 'each_yellow_or_red'
+].sort(); // Trier pour l'affichage
+// Les 'Options' sont gérées par des booléens fixes
 
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule], // Ajout de ReactiveFormsModule
   templateUrl: './card.html',
   styles: []
 })
 export class Card {
-  // Entrée de l'URL de l'image (Data URL)
+  // Le FormGroup est maintenant passé en @Input
+  @Input({ required: true }) cardForm!: FormGroup;
   @Input({ required: true }) cardUrl!: string;
 
-  private tfService = inject(TensorflowService);
+  private fb = inject(FormBuilder);
 
-  // Constantes pour le modèle d'élément
-  private readonly MODEL_NAME = 'CARD_MODEL';
-  private readonly ELEMENT_SCORE_THRESHOLD = 0.2; // Seuil de 20% pour les éléments
+  // Listes des options pour les <select> du template
+  colorOptions = COLOR_CLASSES;
+  valueOptions = VALUE_CLASSES;
+  conditionOptions = CONDITION_CLASSES;
+  multiplierOptions = MULTIPLIER_CLASSES;
 
-  // Signals pour l'état et les résultats
-  isLoading = signal(true);
-  analyzedElements = signal<ElementDetection[]>([]);
+  // Helpers pour accéder facilement aux parties du formulaire dans le template
+  get optionsGroup(): FormGroup {
+    return this.cardForm.get('options') as FormGroup;
+  }
+
+  get conditionsArray(): FormArray<FormControl<string|null>> {
+    return this.cardForm.get('conditions') as FormArray<FormControl<string|null>>;
+  }
+
+  // Fonctions pour manipuler le FormArray 'conditions'
 
   /**
-   * Lance la détection du second modèle sur l'image découpée.
+   * Ajoute une nouvelle condition vide au FormArray
    */
-  async analyzeCard(imageElement: HTMLImageElement) {
-    this.isLoading.set(true);
+  addCondition() {
+    this.conditionsArray.push(this.fb.control('')); // Ajoute un FormControl vide
+  }
 
-    // S'assurer que le modèle est chargé (le composant parent doit l'avoir initié)
-    // Ici, nous supposons que le modèle a été chargé une fois par le composant parent.
-
-    try {
-      // Le service est maintenant capable de prendre un élément <img>
-      const results = await this.tfService.detect(imageElement, this.ELEMENT_SCORE_THRESHOLD, this.MODEL_NAME);
-
-      if (results && results.boxes.length > 0) {
-        const elements: ElementDetection[] = [];
-
-        // Parcourir les résultats et les mapper aux noms de classe
-        for (let i = 0; i < results.boxes.length; i++) {
-          const classId = results.classes[i];
-          const score = results.scores[i];
-
-          // Le tableau ELEMENT_CLASS_NAMES est mis à jour et peut contenir jusqu'à 43 indices (0 à 42)
-          if (ELEMENT_CLASS_NAMES[classId]) {
-            elements.push({
-              className: ELEMENT_CLASS_NAMES[classId],
-              score: score
-            });
-          }
-        }
-
-        // Trier par score décroissant pour afficher les éléments les plus probables en premier
-        elements.sort((a, b) => b.score - a.score);
-
-        this.analyzedElements.set(elements);
-
-      } else {
-        this.analyzedElements.set([]);
-      }
-
-    } catch (e) {
-      console.error("Erreur d'analyse de la carte:", e);
-      this.analyzedElements.set([]);
-    } finally {
-      this.isLoading.set(false);
-    }
+  /**
+   * Retire une condition à un index spécifique
+   */
+  removeCondition(index: number) {
+    this.conditionsArray.removeAt(index);
   }
 }

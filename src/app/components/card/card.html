@@ -1,24 +1,75 @@
-<div class="flex flex-col items-center bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200">
-  <img #cardImage
-       [src]="cardUrl"
-       alt="Carte découpée"
-       (load)="analyzeCard(cardImage)"
-       class="max-h-32 shadow-lg border-2 border-indigo-300 rounded-lg object-contain mb-2"
-       crossOrigin="anonymous"
-  >
-  <div *ngIf="!isLoading()" class="text-xs w-full">
-    <p *ngIf="analyzedElements().length === 0" class="text-red-500 font-semibold text-center">
-        Aucun élément trouvé (&lt; 20%)
-    </p>
-    <div *ngFor="let element of analyzedElements()" class="flex justify-between items-center my-0.5">
-      <span class="font-medium text-gray-700">{{ element.className }}</span>
-      <span class="font-bold" [ngClass]="{'text-green-600': element.score > 0.5, 'text-orange-500': element.score <= 0.5}">
-        {{ (element.score * 100) | number:'1.0-0' }}%
-      </span>
-    </div>
-  </div>
+<div [formGroup]="cardForm" class="flex flex-col bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200 space-y-2">
 
-  <div *ngIf="isLoading()" class="text-xs text-indigo-600 font-medium py-3">
-    Analyse...
+  <img [src]="cardUrl"
+       alt="Carte découpée"
+       class="shadow-lg border-2 border-indigo-300 rounded-lg object-contain mb-2"
+  >
+
+  <div class="w-full text-xs space-y-2">
+
+    <div>
+      <label class="block font-medium text-gray-700">Couleur</label>
+      <select formControlName="color" class="w-full p-1 border rounded">
+        <option value="">-- Aucune --</option>
+        <option *ngFor="let color of colorOptions" [value]="color">{{ color }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-medium text-gray-700">Valeur</label>
+      <select formControlName="value" class="w-full p-1 border rounded">
+        <option value="">-- Aucune --</option>
+        <option *ngFor="let val of valueOptions" [value]="val">{{ val }}</option>
+      </select>
+    </div>
+
+    <div formGroupName="options" class="p-2 border rounded bg-white">
+      <label class="block font-medium text-gray-700 mb-1">Options</label>
+      <div class="grid grid-cols-2 gap-1">
+        <div>
+          <input type="checkbox" formControlName="chimera" id="chimera-{{cardUrl}}">
+          <label for="chimera-{{cardUrl}}" class="ml-1">Chimera</label>
+        </div>
+        <div>
+          <input type="checkbox" formControlName="gem" id="gem-{{cardUrl}}">
+          <label for="gem-{{cardUrl}}" class="ml-1">Gem</label>
+        </div>
+        <div>
+          <input type="checkbox" formControlName="hint" id="hint-{{cardUrl}}">
+          <label for="hint-{{cardUrl}}" class="ml-1">Hint</label>
+        </div>
+        <div>
+          <input type="checkbox" formControlName="night" id="night-{{cardUrl}}">
+          <label for="night-{{cardUrl}}" class="ml-1">Night</label>
+        </div>
+        <div>
+          <input type="checkbox" formControlName="thistle" id="thistle-{{cardUrl}}">
+          <label for="thistle-{{cardUrl}}" class="ml-1">Thistle</label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="block font-medium text-gray-700">Multiplicateur</label>
+      <select formControlName="multiplier" class="w-full p-1 border rounded">
+        <option value="">-- Aucun --</option>
+        <option *ngFor="let mult of multiplierOptions" [value]="mult">{{ mult }}</option>
+      </select>
+    </div>
+
+    <div formArrayName="conditions" class="p-2 border rounded bg-white space-y-1">
+      <label class="block font-medium text-gray-700 mb-1">Conditions</label>
+
+      <div *ngFor="let control of conditionsArray.controls; let i = index" class="flex items-center space-x-1">
+        <select [formControl]="control" class="w-full p-1 border rounded">
+          <option value="">-- Sélectionner --</option>
+          <option *ngFor="let cond of conditionOptions" [value]="cond">{{ cond }}</option>
+        </select>
+        <button type="button" (click)="removeCondition(i)" class="px-2 py-1 text-red-600 font-bold">&times;</button>
+      </div>
+
+      <button type="button" (click)="addCondition()" class="w-full text-xs text-blue-600 hover:text-blue-800">+ Ajouter condition</button>
+    </div>
+
   </div>
 </div>
