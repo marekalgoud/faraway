@@ -16,7 +16,7 @@ export interface DetectionResult {
 export class TensorflowService {
 
   // --- Configuration ---
-  private readonly MODEL_INPUT_SIZE: number = 640;
+  // private readonly MODEL_INPUT_SIZE: number = 640;
   private readonly IOU_THRESHOLD: number = 0.45; // Seuil IOU pour NMS
   private readonly MAX_DETECTIONS: number = 50; // Nombre maximum de détections à conserver
   // ---------------------
@@ -33,7 +33,7 @@ export class TensorflowService {
   /**
    * Charge un modèle GraphModel et l'enregistre avec un nom unique.
    */
-  public loadModel(modelUrl: string, modelName: string): Promise<void> {
+  public loadModel(modelUrl: string, modelName: string, inputSize: number): Promise<void> {
     if (this.loadingPromises.has(modelName)) {
       return this.loadingPromises.get(modelName)!;
     }
@@ -47,7 +47,7 @@ export class TensorflowService {
 
         // Échauffement (Warmup)
         tf.tidy(() => {
-          const dummyInput = tf.zeros([1, this.MODEL_INPUT_SIZE, this.MODEL_INPUT_SIZE, 3], 'float32');
+          const dummyInput = tf.zeros([1, inputSize, inputSize, 3], 'float32');
           model.execute(dummyInput);
         });
 
@@ -68,7 +68,7 @@ export class TensorflowService {
   /**
    * Traite la sortie d'un modèle YOLOv8/v11 (générique pour N classes).
    */
-  private async processYoloOutput(outputTensor: tf.Tensor, scoreThreshold: number): Promise<DetectionResult> {
+  private async processYoloOutput(outputTensor: tf.Tensor, scoreThreshold: number,  inputSize: number): Promise<DetectionResult> {
 
     const intermediates: tf.Tensor[] = [];
 
@@ -146,7 +146,7 @@ export class TensorflowService {
       intermediates.push(finalBoxesPixelCoords);
 
       // Normaliser les coordonnées (0-640) en (0-1)
-      const finalBoxesNormalized = finalBoxesPixelCoords.div(this.MODEL_INPUT_SIZE);
+      const finalBoxesNormalized = finalBoxesPixelCoords.div(inputSize);
 
       // 7. Convertir les tenseurs finaux en tableaux JavaScript
       const result: DetectionResult = {
@@ -171,7 +171,7 @@ export class TensorflowService {
   /**
    * Exécute la détection d'objets sur un élément Image ou Vidéo avec le modèle spécifié.
    */
-  public async detect(sourceElement: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement, scoreThreshold: number, modelName: string): Promise<DetectionResult | null> {
+  public async detect(sourceElement: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement, scoreThreshold: number, modelName: string, inputSize: number = 640): Promise<DetectionResult | null> {
     const model = this.models.get(modelName);
     if (!model) {
       console.error(`Erreur: Le modèle '${modelName}' n'est pas chargé.`);
@@ -186,7 +186,7 @@ export class TensorflowService {
       // 2. Redimensionner et prétraiter
       const resizedTensor = tf.image.resizeBilinear(
         inputTensor,
-        [this.MODEL_INPUT_SIZE, this.MODEL_INPUT_SIZE],
+        [inputSize, inputSize],
         true
       );
 
@@ -201,7 +201,7 @@ export class TensorflowService {
 
     // 4. Traiter la sortie YOLO (asynchrone à cause du NMS)
     try {
-      const processedResults = await this.processYoloOutput(outputTensor, scoreThreshold);
+      const processedResults = await this.processYoloOutput(outputTensor, scoreThreshold, inputSize);
       return processedResults;
     } catch (e) {
       console.error("Échec du traitement des résultats YOLO.", e);

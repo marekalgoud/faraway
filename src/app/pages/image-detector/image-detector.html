@@ -3,7 +3,7 @@
 
   <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
 
-    <!-- Contrôles d'Upload et de Chargement -->
+    <!-- ... (Contrôles d'Upload et Chargement inchangés) ... -->
     <div class="flex flex-col sm:flex-row gap-4 mb-6 items-center">
       <input
         type="file"
@@ -22,14 +22,14 @@
       </button>
     </div>
 
-    <!-- Indicateur de chargement -->
+    <!-- ... (Indicateur de chargement inchangé) ... -->
     <div *ngIf="isLoading()"
          class="loading-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
       <div class="loader text-indigo-700 text-2xl mb-4" style="border: 8px solid #f3f3f3; border-top: 8px solid #4f46e5; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
       <p class="text-indigo-700 text-xl font-medium">{{ loadingMessage() }}</p>
     </div>
 
-    <!-- Zone d'affichage de l'image et des détections -->
+    <!-- ... (Zone d'affichage de l'image et détections inchangée) ... -->
     <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8">
       <img #imageElement
            [src]="imageUrl()"
@@ -48,10 +48,9 @@
     <!-- FORMULAIRE PRINCIPAL -->
     <form [formGroup]="detectorForm">
 
-      <!-- Section ANALYSE DE CARTES -->
+      <!-- ... (Section d'analyse des cartes inchangée) ... -->
       <div *ngIf="cardsFormArray.controls.length > 0" class="mt-8">
         <h2 class="text-xl font-semibold text-indigo-800 mb-4">🃏 Cartes (Gauche à Droite) & Analyse des Éléments</h2>
-
         <div formArrayName="cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           <div *ngFor="let cardCtrl of cardsFormArray.controls; let i = index" [formGroupName]="i">
             <app-card
@@ -63,13 +62,11 @@
         </div>
       </div>
 
-      <!-- NOUVEAU: Section ANALYSE DES TEMPLES -->
+      <!-- ... (Section d'analyse des temples inchangée) ... -->
       <div *ngIf="templesFormArray.controls.length > 0" class="mt-8">
         <h2 class="text-xl font-semibold text-indigo-800 mb-4">🏛️ Temples & Analyse</h2>
-
         <div formArrayName="temples" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           <div *ngFor="let templeCtrl of templesFormArray.controls; let i = index" [formGroupName]="i">
-            <!-- Utilisation du nouveau composant app-temple -->
             <app-temple
               [templeForm]="ctrlAsFormGroup(templeCtrl)"
               [templeUrl]="croppedTemples()[i].url"
@@ -81,5 +78,28 @@
 
     </form> <!-- Fin du formulaire principal -->
 
+    <!-- NOUVEAU: Section de Calcul de Score -->
+    <div *ngIf="cardsFormArray.controls.length > 0 || templesFormArray.controls.length > 0" class="mt-12 pt-6 border-t">
+      <button
+        (click)="calculateScore()"
+        class="w-full px-8 py-3 rounded-lg text-white font-bold text-lg transition duration-150 bg-green-600 hover:bg-green-700"
+      >
+        Calculer le Score
+      </button>
+
+      <!-- Zone d'affichage des résultats -->
+      <div *ngIf="calculationDetails().length > 0" class="mt-6 p-4 bg-gray-800 text-gray-100 rounded-lg shadow-inner">
+        <h3 class="text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
+        <!-- Utilisation de <pre> pour préserver le formatage et les sauts de ligne -->
+        <pre class="font-mono text-sm whitespace-pre-wrap">
+          <div *ngFor="let detail of calculationDetails()">{{ detail }}</div>
+        </pre>
+        <h2 class="text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
+          Score Total: {{ totalScore() }}
+        </h2>
+      </div>
+    </div>
+
   </div>
 </div>
+
