@@ -41,6 +41,7 @@ export class Card {
   valueOptions = CARD_VALUE_CLASSES.sort();
   conditionOptions = CARD_CONDITION_CLASSES.sort();
   multiplierOptions = CARD_MULTIPLIER_CLASSES.sort();
+  optionsList = ['chimera', 'gem', 'hint', 'night', 'thistle'];
 
   private colorBgMap: Record<string, string> = {
     'red': 'bg-red-100',
@@ -57,8 +58,8 @@ export class Card {
   });
 
   // Helpers pour accéder facilement aux parties du formulaire
-  get optionsGroup(): FormGroup {
-    return this.cardForm().get('options') as FormGroup;
+  get optionsArray(): FormArray<FormControl<string|null>> {
+    return this.cardForm().get('options') as FormArray<FormControl<string|null>>;
   }
 
   get conditionsArray(): FormArray<FormControl<string|null>> {
@@ -72,6 +73,14 @@ export class Card {
 
   removeCondition(index: number) {
     this.conditionsArray.removeAt(index);
+  }
+
+  addOption() {
+    this.optionsArray.push(new FormControl(null, { nonNullable: true }));
+  }
+
+  removeOption(index: number) {
+    this.optionsArray.removeAt(index);
   }
 
   /**

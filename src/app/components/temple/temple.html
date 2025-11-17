@@ -18,30 +18,23 @@
         <option *ngFor="let val of valueOptions" [value]="val">{{ val }}</option>
       </select>
     </div>
-    <div formGroupName="options" class="p-2 border rounded bg-white">
+    <div formArrayName="options" class="p-2 border rounded bg-white shadow-inner space-y-1">
       <label class="block font-medium text-gray-700 mb-1">Options</label>
-      <div class="grid grid-cols-2 gap-1">
-        <div>
-          <input type="checkbox" formControlName="chimera" id="chimera-{{templeUrl}}">
-          <label for="chimera-{{templeUrl}}" class="ml-1">Chimera</label>
-        </div>
-        <div>
-          <input type="checkbox" formControlName="gem" id="gem-{{templeUrl}}">
-          <label for="gem-{{templeUrl}}" class="ml-1">Gem</label>
-        </div>
-        <div>
-          <input type="checkbox" formControlName="hint" id="hint-{{templeUrl}}">
-          <label for="hint-{{templeUrl}}" class="ml-1">Hint</label>
-        </div>
-        <div>
-          <input type="checkbox" formControlName="night" id="night-{{templeUrl}}">
-          <label for="night-{{templeUrl}}" class="ml-1">Night</label>
-        </div>
-        <div>
-          <input type="checkbox" formControlName="thistle" id="thistle-{{templeUrl}}">
-          <label for="thistle-{{templeUrl}}" class="ml-1">Thistle</label>
-        </div>
+
+      <div *ngFor="let control of optionsArray.controls; let i = index" class="flex items-center space-x-1">
+        <select [formControl]="control" class="w-full p-1 border rounded text-xs">
+          <option value="">-- Sélectionner --</option>
+          <option *ngFor="let opt of optionsList" [value]="opt">{{ formatLabel(opt) }}</option>
+        </select>
+        <button type="button" (click)="removeOption(i)" class="text-red-500 hover:text-red-700 text-lg leading-none p-1">
+          &times;
+        </button>
       </div>
+
+      <button type="button" (click)="addOption()"
+              class="mt-1 w-full py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition duration-100">
+        + Ajouter une Option
+      </button>
     </div>
     <div>
       <label class="block font-medium text-gray-700">Multiplicateur</label>

@@ -269,16 +269,14 @@ export class ImageDetectorComponent implements OnInit {
     let bestColor = '', bestValue = '', bestMultiplier = '';
     let bestColorScore = 0, bestValueScore = 0, bestMultiplierScore = 0;
     const foundConditions: string[] = [];
-    const foundOptions: { [key: string]: boolean } = {
-      chimera: false, gem: false, hint: false, night: false, thistle: false
-    };
+    const foundOptions: string[] = [];
 
     if (detections) {
       for (let i = 0; i < detections.classes.length; i++) {
         const classId = detections.classes[i];
         const score = detections.scores[i];
         const className = CARD_ELEMENT_CLASSES[classId];
-        console.log(className, score)
+        this.loadingMessage.set(`element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
         if (!className) continue;
         if (CARD_COLOR_CLASSES.includes(className) && score > bestColorScore) {
           bestColor = className; bestColorScore = score;
@@ -289,7 +287,7 @@ export class ImageDetectorComponent implements OnInit {
         } else if (CARD_CONDITION_CLASSES.includes(className)) {
           foundConditions.push(className);
         } else if (CARD_OPTION_CLASSES.includes(className)) {
-          foundOptions[className] = true;
+          foundOptions.push(className);
         }
       }
     }
@@ -297,7 +295,7 @@ export class ImageDetectorComponent implements OnInit {
       color: [bestColor],
       value: [bestValue],
       multiplier: [bestMultiplier],
-      options: this.fb.group(foundOptions),
+      options: this.fb.array(foundOptions.map(opt => this.fb.control(opt))),
       conditions: this.fb.array(foundConditions.map(cond => this.fb.control(cond)))
     });
   }
@@ -306,9 +304,7 @@ export class ImageDetectorComponent implements OnInit {
     let bestColor = '', bestValue = '', bestMultiplier = '';
     let bestColorScore = 0, bestValueScore = 0, bestMultiplierScore = 0;
     // Les temples peuvent aussi avoir des options (gem, chimera...)
-    const foundOptions: { [key: string]: boolean } = {
-      chimera: false, gem: false, hint: false, night: false, thistle: false
-    };
+    const foundOptions: string[] = [];
 
     // Le mapping des classes du modèle Temple est crucial
     // Cet exemple suppose que le modèle Temple utilise les noms de classe exacts
@@ -328,14 +324,16 @@ export class ImageDetectorComponent implements OnInit {
         if (!className) continue;
 
         if (TEMPLE_COLOR_CLASSES.includes(className) && score > bestColorScore) {
-          bestColor = className; bestColorScore = score;
+          bestColor = className;
+          bestColorScore = score;
         } else if (TEMPLE_VALUE_CLASSES.includes(className) && score > bestValueScore) {
-          bestValue = className; bestValueScore = score;
+          bestValue = className;
+          bestValueScore = score;
         } else if (TEMPLE_MULTIPLIER_CLASSES.includes(className) && score > bestMultiplierScore) {
-          bestMultiplier = className; bestMultiplierScore = score;
+          bestMultiplier = className;
+          bestMultiplierScore = score;
         } else if (CARD_OPTION_CLASSES.includes(className)) {
-           // Les temples peuvent avoir des options (gem, chimera...)
-          foundOptions[className] = true;
+          foundOptions.push(className);
         }
       }
     }
@@ -344,11 +342,9 @@ export class ImageDetectorComponent implements OnInit {
       color: [bestColor],
       value: [bestValue],
       multiplier: [bestMultiplier],
-      options: this.fb.group(foundOptions) // Ajout des options aux temples
+      options: this.fb.array(foundOptions.map(opt => this.fb.control(opt)))
     });
-  }
-
-  drawBoxes(results: DetectionResult) {
+  }  drawBoxes(results: DetectionResult) {
     const canvas = this.canvasRef.nativeElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;

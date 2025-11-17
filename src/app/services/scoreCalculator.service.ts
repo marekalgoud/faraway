@@ -16,7 +16,7 @@ export interface ScoreCalculation {
 // Interface minimale pour les objets comptés
 interface CountableItem {
   color?: string;
-  options?: { [key: string]: boolean };
+  options?: string[];
 }
 
 @Injectable({
@@ -118,12 +118,10 @@ export class ScoreCalculatorService {
       if (item.color) {
         counts[item.color] = (counts[item.color] || 0) + 1;
       }
-      // Compter les options (gem, chimera, etc.)
-      if (item.options) {
-        for (const optName in item.options) {
-          if (item.options[optName]) { // Si la checkbox est cochée
-            counts[optName] = (counts[optName] || 0) + 1;
-          }
+      // Compter les options (gem, chimera, etc.) - maintenant c'est un array
+      if (item.options && Array.isArray(item.options)) {
+        for (const optName of item.options) {
+          counts[optName] = (counts[optName] || 0) + 1;
         }
       }
     }

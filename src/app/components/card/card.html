@@ -16,7 +16,7 @@
     </div>
 
     <!-- Résumé des détections (max 5 éléments) -->
-     carte detectées
+    <h3 class="font-bold">carte detectée</h3>
     <div [class]="`text-xs w-full p-2 rounded-lg shadow-inner ${cardBgClass()}`">
       <!-- Valeur -->
       <div class="flex items-center justify-between p-2">
@@ -41,12 +41,10 @@
       <div class="flex items-center justify-between p-2">
         <span class="font-semibold block mb-2">Options:</span>
         <div class="flex flex-wrap gap-2">
-          @for (option of ['chimera', 'gem', 'hint', 'night', 'thistle']; track option) {
-            @if (optionsGroup.get(option)?.value) {
-              <span class="flex items-center">
-                <img width="20" [src]="'/images/'+ formatLabel(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
-              </span>
-            }
+          @for (option of optionsArray.getRawValue(); track option) {
+            <span class="flex items-center">
+              <img width="20" [src]="'/images/'+ formatLabel(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
+            </span>
           }
         </div>
       </div>
@@ -73,11 +71,11 @@
     </button>
   </div>
 
-  <div *ngIf="isEditing()" [formGroup]="cardForm()" class="w-full space-y-3">
+  @if(isEditing()) {
+  <div [formGroup]="cardForm()" class="w-full space-y-3">
     <img [src]="cardUrl()"
          alt="Carte découpée"
          class="shadow-lg border-2 border-indigo-300 rounded-lg object-contain block mx-auto"
-         style="max-height: 150px;"
     >
 
     <div class="w-full text-xs space-y-2">
@@ -90,30 +88,23 @@
         </select>
       </div>
 
-      <div formGroupName="options" class="p-2 border rounded bg-white shadow-inner">
+      <div formArrayName="options" class="p-2 border rounded bg-white shadow-inner space-y-1">
         <label class="block font-medium text-gray-700 mb-1">Options</label>
-        <div class="grid grid-cols-2 gap-2 text-gray-600">
-          <div>
-            <input type="checkbox" formControlName="chimera" id="chimera-{{cardIndex()}}">
-            <label for="chimera-{{cardIndex()}}" class="ml-1">Chimère</label>
-          </div>
-          <div>
-            <input type="checkbox" formControlName="gem" id="gem-{{cardIndex()}}">
-            <label for="gem-{{cardIndex()}}" class="ml-1">Gemme</label>
-          </div>
-          <div>
-            <input type="checkbox" formControlName="hint" id="hint-{{cardIndex()}}">
-            <label for="hint-{{cardIndex()}}" class="ml-1">Indice</label>
-          </div>
-          <div>
-            <input type="checkbox" formControlName="night" id="night-{{cardIndex()}}">
-            <label for="night-{{cardIndex()}}" class="ml-1">Nuit</label>
-          </div>
-          <div>
-            <input type="checkbox" formControlName="thistle" id="thistle-{{cardIndex()}}">
-            <label for="thistle-{{cardIndex()}}" class="ml-1">Chardon</label>
-          </div>
+
+        <div *ngFor="let control of optionsArray.controls; let i = index" class="flex items-center space-x-1">
+          <select [formControl]="control" class="w-full p-1 border rounded text-xs">
+            <option value="">-- Sélectionner --</option>
+            <option *ngFor="let opt of optionsList" [value]="opt">{{ formatLabel(opt) }}</option>
+          </select>
+          <button type="button" (click)="removeOption(i)" class="text-red-500 hover:text-red-700 text-lg leading-none p-1">
+            &times;
+          </button>
         </div>
+
+        <button type="button" (click)="addOption()"
+                class="mt-1 w-full py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition duration-100">
+          + Ajouter une Option
+        </button>
       </div>
 
       <div formArrayName="conditions" class="p-2 border rounded bg-white shadow-inner space-y-1">
@@ -156,5 +147,5 @@
       Retour au Résumé
     </button>
   </div>
-
+  }
 </div>
