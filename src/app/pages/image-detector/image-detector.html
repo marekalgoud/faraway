@@ -25,7 +25,7 @@
     <!-- ... (Indicateur de chargement inchangé) ... -->
     <div *ngIf="isLoading()"
          class="loading-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
-      <div class="loader text-indigo-700 text-2xl mb-4" style="border: 8px solid #f3f3f3; border-top: 8px solid #4f46e5; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
+      <div class="loader text-indigo-700 text-2xl mb-4"></div>
       <p class="text-indigo-700 text-xl font-medium">{{ loadingMessage() }}</p>
     </div>
 
@@ -56,6 +56,7 @@
             <app-card
               [cardForm]="ctrlAsFormGroup(cardCtrl)"
               [cardUrl]="croppedCards()[i].url"
+              [cardIndex]="i"
               class="w-full"
             ></app-card>
           </div>

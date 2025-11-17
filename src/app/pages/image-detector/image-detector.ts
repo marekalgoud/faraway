@@ -37,7 +37,7 @@ interface CroppedFormItem {
   imports: [CommonModule, ReactiveFormsModule, Card, Temple],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './image-detector.html',
-  styles: [`/* ... (styles inchangés) ... */`]
+  styleUrl: './image-detector.scss'
 })
 export class ImageDetectorComponent implements OnInit {
   // ... (ViewChilds, injections inchangés)
