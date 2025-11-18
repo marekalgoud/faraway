@@ -11,95 +11,112 @@
         accept="image/*"
         class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
         [disabled]="isLoading()"
-      >
-      <button
-        (click)="detectImage()"
-        [disabled]="!imageSelected() || isLoading()"
-        class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-        [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
-      >
-        Détecter Objets
-      </button>
-    </div>
-
-    <!-- ... (Indicateur de chargement inchangé) ... -->
-    <div *ngIf="isLoading()"
-         class="loading-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
-      <div class="loader text-indigo-700 text-2xl mb-4"></div>
-      <p class="text-indigo-700 text-xl font-medium">{{ loadingMessage() }}</p>
-    </div>
-
-    <!-- ... (Zone d'affichage de l'image et détections inchangée) ... -->
-    <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8">
-      <img #imageElement
-           [src]="imageUrl()"
-           alt="Image chargée pour détection"
-           (load)="onImageLoaded()"
-           class="w-full h-auto object-contain"
-           [ngClass]="{'hidden': !imageUrl()}"
-      >
-      <canvas #canvas
-              class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-      <div *ngIf="!imageUrl()" class="flex items-center justify-center h-64 text-gray-500">
-        Veuillez sélectionner une image (JPG ou PNG).
+        >
+        <button
+          (click)="detectImage()"
+          [disabled]="!imageSelected() || isLoading()"
+          class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+          [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+          >
+          Détecter Objets
+        </button>
       </div>
-    </div>
 
-    <!-- FORMULAIRE PRINCIPAL -->
-    <form [formGroup]="detectorForm">
-      <!-- ... (Section d'analyse des cartes inchangée) ... -->
-      <div *ngIf="cardsFormArray.controls.length > 0" class="mt-8">
-        <h2 class="text-xl font-semibold text-indigo-800 mb-4">🃏 Cartes (Gauche à Droite) & Analyse des Éléments</h2>
-        <div formArrayName="cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          <div *ngFor="let cardCtrl of cardsFormArray.controls; let i = index" [formGroupName]="i">
-            <app-card
-              [cardForm]="ctrlAsFormGroup(cardCtrl)"
-              [cardUrl]="croppedCards()[i].url"
-              [cardIndex]="i"
-              class="w-full"
-            ></app-card>
-          </div>
+      <!-- ... (Indicateur de chargement inchangé) ... -->
+      @if (isLoading()) {
+        <div
+          class="loading-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+          <div class="loader text-indigo-700 text-2xl mb-4"></div>
+          <p class="text-indigo-700 text-xl font-medium">{{ loadingMessage() }}</p>
         </div>
-      </div>
+      }
 
-      <!-- ... (Section d'analyse des temples inchangée) ... -->
-      <div *ngIf="templesFormArray.controls.length > 0" class="mt-8">
-        <h2 class="text-xl font-semibold text-indigo-800 mb-4">🏛️ Temples & Analyse</h2>
-        <div formArrayName="temples" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          <div *ngFor="let templeCtrl of templesFormArray.controls; let i = index" [formGroupName]="i">
-            <app-temple
-              [templeForm]="ctrlAsFormGroup(templeCtrl)"
-              [templeUrl]="croppedTemples()[i].url"
-              class="w-full"
-            ></app-temple>
-          </div>
+      <!-- ... (Zone d'affichage de l'image et détections inchangée) ... -->
+      <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8">
+        <img #imageElement
+          [src]="imageUrl()"
+          alt="Image chargée pour détection"
+          (load)="onImageLoaded()"
+          class="w-full h-auto object-contain"
+          [ngClass]="{'hidden': !imageUrl()}"
+          >
+          <canvas #canvas
+          class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
+          @if (!imageUrl()) {
+            <div class="flex items-center justify-center h-64 text-gray-500">
+              Veuillez sélectionner une image (JPG ou PNG).
+            </div>
+          }
         </div>
-      </div>
 
-    </form> <!-- Fin du formulaire principal -->
+        <!-- FORMULAIRE PRINCIPAL -->
+        <form [formGroup]="detectorForm">
+          <!-- ... (Section d'analyse des cartes inchangée) ... -->
+          @if (cardsFormArray.controls.length > 0) {
+            <div class="mt-8">
+              <h2 class="text-xl font-semibold text-indigo-800 mb-4">🃏 Cartes (Gauche à Droite) & Analyse des Éléments</h2>
+              <div formArrayName="cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                @for (cardCtrl of cardsFormArray.controls; track cardCtrl; let i = $index) {
+                  <div [formGroupName]="i">
+                    <app-card
+                      [cardForm]="ctrlAsFormGroup(cardCtrl)"
+                      [cardUrl]="getCroppedCardUrl(i)"
+                      [cardIndex]="i"
+                      class="w-full"
+                    ></app-card>
+                  </div>
+                }
+              </div>
+            </div>
+          }
 
-    <!-- NOUVEAU: Section de Calcul de Score -->
-    <div *ngIf="cardsFormArray.controls.length > 0 || templesFormArray.controls.length > 0" class="mt-12 pt-6 border-t">
-      <button
-        (click)="calculateScore()"
-        class="w-full px-8 py-3 rounded-lg text-white font-bold text-lg transition duration-150 bg-green-600 hover:bg-green-700"
-      >
-        Calculer le Score
-      </button>
+          <!-- ... (Section d'analyse des temples inchangée) ... -->
+          @if (templesFormArray.controls.length > 0) {
+            <div class="mt-8">
+              <h2 class="text-xl font-semibold text-indigo-800 mb-4">🏛️ Temples & Analyse</h2>
+              <div formArrayName="temples" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                @for (templeCtrl of templesFormArray.controls; track templeCtrl; let i = $index) {
+                  <div [formGroupName]="i">
+                    <app-temple
+                      [templeForm]="ctrlAsFormGroup(templeCtrl)"
+                      [templeUrl]="getCroppedTempleUrl(i)"
+                      class="w-full"
+                    ></app-temple>
+                  </div>
+                }
+              </div>
+            </div>
+          }
 
-      <!-- Zone d'affichage des résultats -->
-      <div *ngIf="calculationDetails().length > 0" class="mt-6 p-4 bg-gray-800 text-gray-100 rounded-lg shadow-inner">
-        <h3 class="text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
-        <!-- Utilisation de <pre> pour préserver le formatage et les sauts de ligne -->
-        <pre class="font-mono text-sm whitespace-pre-wrap">
-          <div *ngFor="let detail of calculationDetails()">{{ detail }}</div>
-        </pre>
-        <h2 class="text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
-          Score Total: {{ totalScore() }}
-        </h2>
+        </form> <!-- Fin du formulaire principal -->
+
+        <!-- NOUVEAU: Section de Calcul de Score -->
+        @if (cardsFormArray.controls.length > 0 || templesFormArray.controls.length > 0) {
+          <div class="mt-12 pt-6 border-t">
+            <button
+              (click)="calculateScore()"
+              class="w-full px-8 py-3 rounded-lg text-white font-bold text-lg transition duration-150 bg-green-600 hover:bg-green-700"
+              >
+              Calculer le Score
+            </button>
+            <!-- Zone d'affichage des résultats -->
+            @if (calculationDetails().length > 0) {
+              <div class="mt-6 p-4 bg-gray-800 text-gray-100 rounded-lg shadow-inner">
+                <h3 class="text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
+                <!-- Utilisation de <pre> pour préserver le formatage et les sauts de ligne -->
+                <pre class="font-mono text-sm whitespace-pre-wrap">
+                  @for (detail of calculationDetails(); track detail) {
+                    <div>{{ detail }}</div>
+                  }
+                </pre>
+                <h2 class="text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
+                  Score Total: {{ totalScore() }}
+                </h2>
+              </div>
+            }
+          </div>
+        }
+
       </div>
     </div>
-
-  </div>
-</div>
 

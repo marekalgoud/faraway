@@ -23,19 +23,46 @@ export const CARD_MULTIPLIER_CLASSES = CARD_ELEMENT_CLASSES.filter(name => name.
 
 // --- Modèle d'ANALYSE DE TEMPLE ---
 // (Basé sur vos listes)
-export const TEMPLE_COLOR_CLASSES = ['card_blue', 'card_green', 'card_red', 'card_yellow'];
-export const TEMPLE_VALUE_CLASSES = ['value_1', 'value_2', 'value_5'];
+export const TEMPLE_COLOR_CLASSES = ['card_blue', 'card_gray', 'card_green', 'card_red', 'card_yellow'];
+export const TEMPLE_VALUE_CLASSES = ['value_1', 'value_2', 'value_4', 'value_5'];
 export const TEMPLE_MULTIPLIER_CLASSES = [
-  'each_all_colors', 'each_blue', 'each_chimera', 'each_gem', 'each_green',
-  'each_hint', 'each_night', 'each_red', 'each_thistle', 'each_yellow_or_blue',
-  'each_yellow_or_green', 'each_yellow_or_red', 'each_blue_or_yellow'
+  'each_all_colors', 'each_blue', 'each_blue_or_yellow', 'each_chimera', 'each_gem', 'each_green',
+  'each_green_or_blue', 'each_green_or_red', 'each_hint', 'each_night', 'each_red', 'each_red_or_blue',
+  'each_red_or_yellow', 'each_thistle', 'each_yellow', 'each_yellow_or_green'
 ];
 
 // (Hypothèse sur le mapping des classes du modèle Temple)
 // !! IMPORTANT: L'ordre de ce tableau DOIT correspondre aux IDs 0, 1, 2... de votre 3ème modèle
 export const TEMPLE_ELEMENT_CLASSES_MAPPING = [
-  ...TEMPLE_COLOR_CLASSES,
-  ...TEMPLE_VALUE_CLASSES,
-  ...TEMPLE_MULTIPLIER_CLASSES,
-  ...CARD_OPTION_CLASSES // Assurez-vous que le modèle temple peut détecter 'gem', 'chimera' etc.
+  // Mapping matching the model metadata (indices 0..29)
+  'card_blue',
+  'card_gray',
+  'card_green',
+  'card_red',
+  'card_yellow',
+  'chimera',
+  'each_all_colors',
+  'each_blue',
+  'each_blue_or_yellow',
+  'each_chimera',
+  'each_gem',
+  'each_green',
+  'each_green_or_blue',
+  'each_green_or_red',
+  'each_hint',
+  'each_night',
+  'each_red',
+  'each_red_or_blue',
+  'each_red_or_yellow',
+  'each_thistle',
+  'each_yellow',
+  'each_yellow_or_green',
+  'gem',
+  'hint',
+  'night',
+  'thistle',
+  'value_1',
+  'value_2',
+  'value_4',
+  'value_5'
 ];

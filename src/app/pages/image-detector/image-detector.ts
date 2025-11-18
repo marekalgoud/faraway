@@ -96,6 +96,19 @@ export class ImageDetectorComponent implements OnInit {
     return control as FormGroup;
   }
 
+  // Helpers sûrs pour récupérer les URLs découpées (protègent contre les accès hors-borne)
+  getCroppedCardUrl(index: number): string {
+    const arr = this.croppedCards();
+    if (!arr || !arr[index]) return '';
+    return arr[index].url || '';
+  }
+
+  getCroppedTempleUrl(index: number): string {
+    const arr = this.croppedTemples();
+    if (!arr || !arr[index]) return '';
+    return arr[index].url || '';
+  }
+
   /**
    * Charge les TROIS modèles TensorFlow.js au démarrage.
    */
@@ -306,14 +319,7 @@ export class ImageDetectorComponent implements OnInit {
     // Les temples peuvent aussi avoir des options (gem, chimera...)
     const foundOptions: string[] = [];
 
-    // Le mapping des classes du modèle Temple est crucial
-    // Cet exemple suppose que le modèle Temple utilise les noms de classe exacts
-    const TEMPLE_ELEMENT_CLASSES_MAPPING = [
-        ...TEMPLE_COLOR_CLASSES,
-        ...TEMPLE_VALUE_CLASSES,
-        ...TEMPLE_MULTIPLIER_CLASSES,
-        ...CARD_OPTION_CLASSES // Assurez-vous que le modèle temple peut détecter 'gem', 'chimera' etc.
-    ]; // L'ordre DOIT correspondre aux IDs du modèle
+    // Utiliser le mapping global `TEMPLE_ELEMENT_CLASSES_MAPPING` importé depuis `constants`.
 
     if (detections) {
       for (let i = 0; i < detections.classes.length; i++) {

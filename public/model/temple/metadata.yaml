@@ -1,7 +1,7 @@
-description: Ultralytics YOLO11s model trained on /content/datasets/Faraway.v7i.yolov11/data.yaml
+description: Ultralytics YOLO11s model trained on /content/datasets/faraway temple.v4i.yolov11/data.yaml
 author: Ultralytics
-date: '2025-11-12T20:30:31.835810'
-version: 8.3.227
+date: '2025-11-18T13:54:44.789045'
+version: 8.3.228
 license: AGPL-3.0 License (https://ultralytics.com/license)
 docs: https://docs.ultralytics.com
 stride: 32
@@ -12,48 +12,35 @@ imgsz:
 - 640
 names:
   0: card_blue
-  1: card_green
-  2: card_red
-  3: card_yellow
-  4: chimera
-  5: condition_chimera
-  6: condition_gem
-  7: condition_thistle
-  8: each_all_colors
-  9: each_blue
-  10: each_chimera
-  11: each_gem
-  12: each_green
-  13: each_hint
-  14: each_night
-  15: each_red
-  16: each_thistle
-  17: each_yellow_or_blue
-  18: each_yellow_or_green
-  19: each_yellow_or_red
-  20: gem
-  21: hint
-  22: night
-  23: thistle
-  24: value_1
-  25: value_10
-  26: value_12
-  27: value_13
-  28: value_14
-  29: value_15
-  30: value_16
-  31: value_17
-  32: value_18
-  33: value_19
-  34: value_2
-  35: value_20
-  36: value_24
-  37: value_3
-  38: value_4
-  39: value_5
-  40: value_7
-  41: value_8
-  42: value_9
+  1: card_gray
+  2: card_green
+  3: card_red
+  4: card_yellow
+  5: chimera
+  6: each_all_colors
+  7: each_blue
+  8: each_blue_or_yellow
+  9: each_chimera
+  10: each_gem
+  11: each_green
+  12: each_green_or_blue
+  13: each_green_or_red
+  14: each_hint
+  15: each_night
+  16: each_red
+  17: each_red_or_blue
+  18: each_red_or_yellow
+  19: each_thistle
+  20: each_yellow
+  21: each_yellow_or_green
+  22: gem
+  23: hint
+  24: night
+  25: thistle
+  26: value_1
+  27: value_2
+  28: value_4
+  29: value_5
 args:
   batch: 1
   half: false

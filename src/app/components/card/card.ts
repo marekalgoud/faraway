@@ -1,7 +1,9 @@
-import { Component, signal, ViewChild, ElementRef, input, computed } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormBuilder, FormControl } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { CARD_COLOR_CLASSES, CARD_CONDITION_CLASSES, CARD_MULTIPLIER_CLASSES, CARD_VALUE_CLASSES } from '../../constants';
 
 // Interface pour stocker les résultats de l'analyse simplifiée
@@ -17,7 +19,7 @@ interface ElementDetection {
   templateUrl: './card.html',
   styles: []
 })
-export class Card {
+export class Card implements OnInit, OnDestroy {
 
   cardForm = input.required<FormGroup>();
   cardUrl = input.required<string|null>();
@@ -38,7 +40,11 @@ export class Card {
 
   // Listes des options pour les <select> du template
   colorOptions = CARD_COLOR_CLASSES.sort();
-  valueOptions = CARD_VALUE_CLASSES.sort();
+  valueOptions = CARD_VALUE_CLASSES.sort((a, b) => {
+    const na = parseInt((a || '').replace(/\D/g, ''), 10) || 0;
+    const nb = parseInt((b || '').replace(/\D/g, ''), 10) || 0;
+    return na - nb;
+  });
   conditionOptions = CARD_CONDITION_CLASSES.sort();
   multiplierOptions = CARD_MULTIPLIER_CLASSES.sort();
   optionsList = ['chimera', 'gem', 'hint', 'night', 'thistle'];
@@ -51,11 +57,31 @@ export class Card {
   };
 
   cardBgClass = computed(() => {
-    const color = this.cardForm().get('color')?.value;
+    const color = this.selectedColor();
     if (!color) return 'bg-gray-200';
     const normalizedColor = this.formatLabel(color).toLowerCase();
     return this.colorBgMap[normalizedColor] || 'bg-gray-200';
   });
+
+  // Signal to reflect current color control value and subscription for cleanup
+  private selectedColor = signal<string>('');
+  private _subs: Subscription | null = null;
+
+  ngOnInit(): void {
+    // If the input FormGroup already has a color control, initialize and subscribe
+    const fg = this.cardForm();
+    if (!fg) return;
+    const ctrl = fg.get('color') as FormControl | null;
+    if (ctrl) {
+      const initial = ctrl.value as string | null;
+      this.selectedColor.set(initial || '');
+      this._subs = ctrl.valueChanges?.subscribe((v: any) => this.selectedColor.set(v || '')) ?? null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this._subs) this._subs.unsubscribe();
+  }
 
   // Helpers pour accéder facilement aux parties du formulaire
   get optionsArray(): FormArray<FormControl<string|null>> {

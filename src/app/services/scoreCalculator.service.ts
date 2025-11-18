@@ -172,6 +172,7 @@ export class ScoreCalculatorService {
       case 'each_thistle': return visibleCounts['thistle'] || 0;
       // Couleurs
       case 'each_blue': return visibleCounts['card_blue'] || 0;
+      case 'each_yellow': return visibleCounts['card_yellow'] || 0;
       case 'each_green': return visibleCounts['card_green'] || 0;
       case 'each_red': return visibleCounts['card_red'] || 0;
       // Combinaisons
@@ -184,6 +185,7 @@ export class ScoreCalculatorService {
       case 'each_blue_or_yellow':
         return (visibleCounts['card_blue'] || 0) + (visibleCounts['card_yellow'] || 0);
       case 'each_all_colors':
+        // Count only the four standard colors; `card_gray` is neutral and excluded.
         return (visibleCounts['card_blue'] || 0) +
                (visibleCounts['card_green'] || 0) +
                (visibleCounts['card_red'] || 0) +
