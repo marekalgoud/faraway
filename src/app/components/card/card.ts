@@ -1,5 +1,5 @@
 import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormBuilder, FormControl } from '@angular/forms';
@@ -15,7 +15,7 @@ interface ElementDetection {
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './card.html',
   styles: []
 })

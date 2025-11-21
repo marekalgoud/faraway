@@ -20,11 +20,9 @@ import {
   TEMPLE_COLOR_CLASSES,
   TEMPLE_VALUE_CLASSES,
   TEMPLE_MULTIPLIER_CLASSES,
-  TEMPLE_ELEMENT_CLASSES_MAPPING,
-  CARD_OPTION_CLASSES as TEMPLE_OPTION_CLASSES // Les temples utilisent les mêmes options
+  TEMPLE_ELEMENT_CLASSES_MAPPING
 } from '../../constants';
 
-// ... (Interface CroppedFormItem inchangée)
 interface CroppedFormItem {
     url: string;
     formGroup: FormGroup;
@@ -47,7 +45,6 @@ export class ImageDetectorComponent implements OnInit {
   private tfService = inject(TensorflowService);
   private fb = inject(FormBuilder);
   private scoreService = inject(ScoreCalculatorService);
-
 
   // --- Signals ---
   isLoading = signal(true);
@@ -79,7 +76,6 @@ export class ImageDetectorComponent implements OnInit {
   private readonly SCENE_SCORE_THRESHOLD = 0.2;
   private readonly CLASS_CARD_ID = 0;
   private readonly CLASS_TEMPLE_ID = 1;
-
 
   ngOnInit() {
     this.initializeModels();
@@ -289,8 +285,10 @@ export class ImageDetectorComponent implements OnInit {
         const classId = detections.classes[i];
         const score = detections.scores[i];
         const className = CARD_ELEMENT_CLASSES[classId];
-        this.loadingMessage.set(`element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
         if (!className) continue;
+
+        this.loadingMessage.set(`carte - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
+
         if (CARD_COLOR_CLASSES.includes(className) && score > bestColorScore) {
           bestColor = className; bestColorScore = score;
         } else if (CARD_VALUE_CLASSES.includes(className) && score > bestValueScore) {
@@ -325,10 +323,12 @@ export class ImageDetectorComponent implements OnInit {
       for (let i = 0; i < detections.classes.length; i++) {
         const classId = detections.classes[i];
         const score = detections.scores[i];
-        // Utiliser le mapping des classes du temple (hypothétique)
+
         const className = TEMPLE_ELEMENT_CLASSES_MAPPING[classId];
         if (!className) continue;
 
+        this.loadingMessage.set(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
+        console.log(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
         if (TEMPLE_COLOR_CLASSES.includes(className) && score > bestColorScore) {
           bestColor = className;
           bestColorScore = score;
@@ -343,6 +343,8 @@ export class ImageDetectorComponent implements OnInit {
         }
       }
     }
+
+    console.log(bestColor, bestValue, bestMultiplier, foundOptions);
 
     return this.fb.group({
       color: [bestColor],

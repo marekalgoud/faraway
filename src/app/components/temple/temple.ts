@@ -1,6 +1,6 @@
 import { Component, Input, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
 
@@ -21,7 +21,7 @@ const MULTIPLIER_CLASSES = [
 @Component({
   selector: 'app-temple',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule], // Ajout de CommonModule + ReactiveFormsModule
+  imports: [ReactiveFormsModule], // Ajout de CommonModule + ReactiveFormsModule
   templateUrl: './temple.html',
   styles: []
 })
