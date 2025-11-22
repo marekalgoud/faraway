@@ -1,4 +1,14 @@
-<div class="flex flex-col bg-gray-100 p-3 rounded-xl shadow-xl border border-gray-200 w-full">
+<div class="flex flex-col bg-gray-100 p-3 rounded-xl shadow-xl border border-gray-200 w-full relative">
+
+  <!-- Bouton de suppression en haut à droite -->
+  <button (click)="onDelete()" aria-label="Supprimer cette carte"
+    class="absolute top-2 right-2 z-50 w-6 h-6 flex items-center justify-center rounded-full bg-red-400 hover:bg-red-600 text-white shadow-md transition duration-150"
+    title="Supprimer cette carte">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
 
   <!-- ==================================================================== -->
   <!-- VUE SOMMAIRE (isEditing() est FAUX) : Image avec boîtes + Résumé + Bouton Modifier -->
@@ -11,7 +21,7 @@
           <img #cardImage
             [src]="cardUrl()"
             alt=""
-            class="max-h-full w-auto shadow-lg border-2 border-indigo-300 rounded-lg object-contain block mx-auto"
+            class="max-h-full w-auto shadow-lg border-1 border-gray-200 rounded-lg object-contain block mx-auto"
             crossOrigin="anonymous"
             >
         } @else {

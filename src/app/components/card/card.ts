@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy, output } from '@angular/core';
 
 
 // NOUVEAUX Imports pour Reactive Forms
@@ -24,6 +24,9 @@ export class Card implements OnInit, OnDestroy {
   cardForm = input.required<FormGroup>();
   cardUrl = input.required<string|null>();
   cardIndex = input<number|null>();
+
+  // Output pour signaler la suppression au parent
+  deleteCard = output<number>();
 
   // Références aux éléments du DOM pour le dessin des boîtes
   @ViewChild('cardImage') cardImage!: ElementRef<HTMLImageElement>;
@@ -114,6 +117,16 @@ export class Card implements OnInit, OnDestroy {
    */
   toggleEdit() {
     this.isEditing.update(editing => !editing);
+  }
+
+  /**
+   * Émet un signal au parent pour supprimer cette carte.
+   */
+  onDelete() {
+    const idx = this.cardIndex();
+    if (idx !== null && idx !== undefined) {
+      this.deleteCard.emit(idx);
+    }
   }
 
   formatLabel(label: string | null): string {

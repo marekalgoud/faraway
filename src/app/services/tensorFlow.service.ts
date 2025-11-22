@@ -4,9 +4,11 @@ import { GraphModel } from '@tensorflow/tfjs';
 
 // Interface pour structurer les résultats de la détection simplifiée après traitement (NMS)
 export interface DetectionResult {
-  boxes: number[][]; // [xmin, ymin, xmax, ymax] normalisées (0 à 1)
+  boxes: number[][]; // [xmin, ymin, xmax, ymax] NORMALISÉES sur les dimensions ORIGINALES (0 à 1)
   scores: number[];
   classes: number[];
+  originalWidth?: number; // Dimensions de l'image originale (avant letterboxing)
+  originalHeight?: number;
 }
 
 
@@ -66,9 +68,52 @@ export class TensorflowService {
   }
 
   /**
+   * Effectue un redimensionnement non-déformant (letterboxing) d'une image.
+   * L'image est redimensionnée pour tenir dans les dimensions cibles tout en conservant son ratio d'aspect,
+   * puis complétée avec du padding gris (127, 127, 127).
+   * Retourne le tenseur prétraité et les offsets de padding pour la conversion des coordonnées.
+   */
+  private letterbox(
+    inputTensor: tf.Tensor,
+    targetSize: number
+  ): { tensor: tf.Tensor; offsetX: number; offsetY: number; scale: number } {
+    const [height, width] = [inputTensor.shape[0] as number, inputTensor.shape[1] as number];
+
+    // Calculer le facteur d'échelle pour maintenir le ratio d'aspect
+    const scale = Math.min(targetSize / width, targetSize / height);
+    const newWidth = Math.floor(width * scale);
+    const newHeight = Math.floor(height * scale);
+
+    // Redimensionner l'image
+    const resized = tf.image.resizeBilinear(inputTensor as tf.Tensor3D, [newHeight, newWidth], true);
+
+    // Calculer les offsets de padding (centrer l'image)
+    const offsetY = Math.floor((targetSize - newHeight) / 2);
+    const offsetX = Math.floor((targetSize - newWidth) / 2);
+    const padBottomY = targetSize - newHeight - offsetY;
+    const padRightX = targetSize - newWidth - offsetX;
+
+    // Appliquer le padding gris (127 / 255 ≈ 0.498)
+    const padded = tf.pad(
+      resized,
+      [[offsetY, padBottomY], [offsetX, padRightX], [0, 0]],
+      127 / 255
+    );
+
+    return { tensor: padded, offsetX, offsetY, scale };
+  }
+
+  /**
    * Traite la sortie d'un modèle YOLOv8/v11 (générique pour N classes).
    */
-  private async processYoloOutput(outputTensor: tf.Tensor, scoreThreshold: number,  inputSize: number): Promise<DetectionResult> {
+  private async processYoloOutput(
+    outputTensor: tf.Tensor,
+    scoreThreshold: number,
+    inputSize: number,
+    letterboxOffset: { offsetX: number; offsetY: number; scale: number } | null,
+    originalWidth?: number,
+    originalHeight?: number
+  ): Promise<DetectionResult> {
 
     const intermediates: tf.Tensor[] = [];
 
@@ -145,19 +190,50 @@ export class TensorflowService {
       const finalBoxesPixelCoords = tf.concat([xminGather, yminGather, xmaxGather, ymaxGather], 1);
       intermediates.push(finalBoxesPixelCoords);
 
-      // Normaliser les coordonnées (0-640) en (0-1)
-      const finalBoxesNormalized = finalBoxesPixelCoords.div(inputSize);
+      // Appliquer la transformation inverse du letterboxing AVANT normalisation
+      let boxesInOriginalPixels: tf.Tensor;
+
+      if (letterboxOffset && originalWidth && originalHeight) {
+        // Les boîtes sont actuellement en pixels du modèle letterboxé (0-640)
+        // Formule: coord_original = (coord_letterboxed - offset) / scale
+        const { offsetX, offsetY, scale } = letterboxOffset;
+        
+        // Créer une matrice d'offsets [offsetX, offsetY, offsetX, offsetY] pour [xmin, ymin, xmax, ymax]
+        const offsetsMatrix = tf.tensor1d([offsetX, offsetY, offsetX, offsetY], 'float32');
+        
+        // Soustraire les offsets: (coord - offset)
+        const unpadded = tf.sub(finalBoxesPixelCoords, offsetsMatrix);
+        intermediates.push(unpadded);
+        
+        // Diviser par le scale: (coord - offset) / scale
+        boxesInOriginalPixels = tf.div(unpadded, tf.scalar(scale, 'float32'));
+        intermediates.push(boxesInOriginalPixels);
+      } else {
+        // Pas de letterboxing: les boîtes sont déjà en pixels du modèle
+        boxesInOriginalPixels = finalBoxesPixelCoords;
+      }
+
+      // Normaliser basé sur les dimensions ORIGINALES
+      const xmin = boxesInOriginalPixels.slice([0, 0], [-1, 1]).div(tf.scalar(originalWidth!, 'float32'));
+      const ymin = boxesInOriginalPixels.slice([0, 1], [-1, 1]).div(tf.scalar(originalHeight!, 'float32'));
+      const xmax = boxesInOriginalPixels.slice([0, 2], [-1, 1]).div(tf.scalar(originalWidth!, 'float32'));
+      const ymax = boxesInOriginalPixels.slice([0, 3], [-1, 1]).div(tf.scalar(originalHeight!, 'float32'));
+      
+      const boxesNormalized = tf.concat([xmin, ymin, xmax, ymax], 1);
+      intermediates.push(xmin, ymin, xmax, ymax);
 
       // 7. Convertir les tenseurs finaux en tableaux JavaScript
       const result: DetectionResult = {
-          boxes: finalBoxesNormalized.arraySync() as number[][],
+          boxes: boxesNormalized.arraySync() as number[][],
           scores: finalScores.arraySync() as number[],
           classes: finalClasses.arraySync() as number[],
+          originalWidth,
+          originalHeight
       };
 
       // 8. Nettoyer les tenseurs
       tf.dispose(intermediates);
-      tf.dispose(finalBoxesNormalized);
+      tf.dispose(boxesNormalized);
 
       return result;
 
@@ -178,20 +254,26 @@ export class TensorflowService {
       return null;
     }
 
+    // Capture les dimensions originales
+    let originalWidth: number;
+    let originalHeight: number;
+
+    // Stockage des paramètres de letterboxing pour la conversion des coordonnées
+    let letterboxParams: { offsetX: number; offsetY: number; scale: number } | null = null;
+
     // Le prétraitement et l'inférence
     const outputTensor = tf.tidy(() => {
       // 1. Convertir les pixels en tenseur
       const inputTensor = tf.browser.fromPixels(sourceElement);
+      originalWidth = inputTensor.shape[1] as number;
+      originalHeight = inputTensor.shape[0] as number;
 
-      // 2. Redimensionner et prétraiter
-      const resizedTensor = tf.image.resizeBilinear(
-        inputTensor,
-        [inputSize, inputSize],
-        true
-      );
+      // 2. Appliquer le letterboxing (redimensionnement non-déformant)
+      const { tensor: letterboxedTensor, offsetX, offsetY, scale } = this.letterbox(inputTensor, inputSize);
+      letterboxParams = { offsetX, offsetY, scale };
 
       // Normaliser à [0, 1] et ajouter la dimension du lot
-      const processedTensor = resizedTensor.div(255.0).expandDims(0);
+      const processedTensor = letterboxedTensor.div(255.0).expandDims(0);
 
       // 3. Exécuter l'inférence
       const results = model.execute(processedTensor) as tf.Tensor | tf.Tensor[];
@@ -201,7 +283,7 @@ export class TensorflowService {
 
     // 4. Traiter la sortie YOLO (asynchrone à cause du NMS)
     try {
-      const processedResults = await this.processYoloOutput(outputTensor, scoreThreshold, inputSize);
+      const processedResults = await this.processYoloOutput(outputTensor, scoreThreshold, inputSize, letterboxParams, originalWidth!, originalHeight!);
       return processedResults;
     } catch (e) {
       console.error("Échec du traitement des résultats YOLO.", e);

@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, inject, signal, computed, OnInit, OnDestroy, output } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 // NOUVEAUX Imports pour Reactive Forms
@@ -29,6 +29,10 @@ export class Temple implements OnInit, OnDestroy {
   // Le FormGroup est maintenant passé en @Input
   @Input({ required: true }) templeForm!: FormGroup;
   @Input({ required: true }) templeUrl!: string;
+  @Input() templeIndex?: number;
+
+  // Output pour signaler la suppression au parent
+  deleteTemple = output<number>();
 
   // UI state
   isEditing = signal(false);
@@ -97,5 +101,14 @@ export class Temple implements OnInit, OnDestroy {
 
   toggleEdit() {
     this.isEditing.update(v => !v);
+  }
+
+  /**
+   * Émet un signal au parent pour supprimer ce temple.
+   */
+  onDelete() {
+    if (this.templeIndex !== undefined) {
+      this.deleteTemple.emit(this.templeIndex);
+    }
   }
 }

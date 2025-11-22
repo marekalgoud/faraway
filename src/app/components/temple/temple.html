@@ -1,9 +1,23 @@
-<div [formGroup]="templeForm" class="flex flex-col bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200 space-y-2">
+<div [formGroup]="templeForm" class="flex flex-col bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200 space-y-2 relative">
+
+  <!-- Bouton de suppression en haut à droite -->
+  <button (click)="onDelete()"
+    class="absolute top-2 right-2 z-50 w-6 h-6 flex items-center justify-center rounded-full bg-red-400 hover:bg-red-600 text-white shadow-md transition duration-150"
+    aria-label="Supprimer ce temple" title="Supprimer ce temple">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Contenu du temple -->
   @if (templeUrl) {
+    <div class="flex justify-center">
     <img [src]="templeUrl"
       alt="Temple découpée"
-      class="shadow-lg border-2 border-indigo-300 rounded-lg object-contain mb-2"
+      class="max-h-full w-auto shadow-lg border-1 border-gray-200 rounded-lg object-contain block mx-auto"
       >
+    </div>
   } @else {
     <div class="w-full h-40 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white text-gray-400 mb-2">
       <div class="text-center">

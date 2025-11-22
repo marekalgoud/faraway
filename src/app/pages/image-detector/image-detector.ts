@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 // ... (imports inchangés)
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { Card } from '../../components/card/card';
@@ -35,7 +35,8 @@ interface CroppedFormItem {
   imports: [CommonModule, ReactiveFormsModule, Card, Temple],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './image-detector.html',
-  styleUrl: './image-detector.scss'
+  styleUrl: './image-detector.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ImageDetectorComponent implements OnInit {
   // ... (ViewChilds, injections inchangés)
@@ -272,6 +273,26 @@ export class ImageDetectorComponent implements OnInit {
     // Mettre à jour les signaux pour l'affichage
     this.totalScore.set(result.score);
     this.calculationDetails.set(result.details);
+  }
+
+  /**
+   * Supprime une carte de la liste (appelé quand l'utilisateur clique sur le bouton delete).
+   */
+  deleteCard(index: number) {
+    this.cardsFormArray.removeAt(index);
+    // Mettre à jour la liste des images découpées
+    const updated = this.croppedCards().filter((_, i) => i !== index);
+    this.croppedCards.set(updated);
+  }
+
+  /**
+   * Supprime un temple de la liste (appelé quand l'utilisateur clique sur le bouton delete).
+   */
+  deleteTemple(index: number) {
+    this.templesFormArray.removeAt(index);
+    // Mettre à jour la liste des images découpées
+    const updated = this.croppedTemples().filter((_, i) => i !== index);
+    this.croppedTemples.set(updated);
   }
 
   private buildCardFormGroup(detections: DetectionResult | null): FormGroup {
