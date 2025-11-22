@@ -28,6 +28,10 @@
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "externalDependencies": [
+              "buffer",
+              "safe-buffer"
             ]
           },
           "configurations": {

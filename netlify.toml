@@ -1,0 +1,13 @@
+[build]
+command = "npm run build"
+publish = "dist/faraway/browser"
+
+# Configuration pour gérer les modules Node.js
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+# Ignorer les erreurs de résolution de modules Node.js au build
+[build.environment]
+NODE_OPTIONS = "--no-warnings"
