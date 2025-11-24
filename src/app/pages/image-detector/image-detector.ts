@@ -52,6 +52,7 @@ export class ImageDetectorComponent implements OnInit {
   loadingMessage = signal("Chargement des modèles de détection...");
   imageUrl = signal<string | undefined>(undefined);
   imageSelected = signal(false);
+  imageRotation = signal<number>(0); // 0, 90, 180, 270
 
   croppedCards = signal<CroppedFormItem[]>([]);
   croppedTemples = signal<CroppedFormItem[]>([]);
@@ -59,6 +60,8 @@ export class ImageDetectorComponent implements OnInit {
   // NOUVEAU: Signals pour le résultat du calcul
   totalScore = signal<number>(0);
   calculationDetails = signal<string[]>([]);
+  errorMessage = signal<string | undefined>(undefined);
+  warningMessage = signal<string | undefined>(undefined);
 
   // --- Formulaire Principal ---
   detectorForm: FormGroup = this.fb.group({
@@ -138,6 +141,7 @@ export class ImageDetectorComponent implements OnInit {
       this.loadingMessage.set("Image sélectionnée...");
       this.clearCanvas();
       this.clearCroppedDetections();
+      this.imageRotation.set(0); // Reset rotation for new image
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -148,6 +152,7 @@ export class ImageDetectorComponent implements OnInit {
     } else {
       this.imageSelected.set(false);
       this.imageUrl.set(undefined);
+      this.imageRotation.set(0);
       this.clearCanvas();
       this.clearCroppedDetections();
     }
@@ -159,10 +164,115 @@ export class ImageDetectorComponent implements OnInit {
   onImageLoaded() {
     const img = this.imageRef.nativeElement;
     const canvas = this.canvasRef.nativeElement;
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+
+    // Draw rotated image preview on canvas
+    this.drawImageOnCanvas(canvas, img, this.imageRotation());
+
     this.loadingMessage.set("Image chargée. Prêt à détecter.");
     this.isLoading.set(false);
+  }
+
+  /**
+   * Draw image on canvas with applied rotation.
+   */
+  private drawImageOnCanvas(canvas: HTMLCanvasElement, imgElement: HTMLImageElement, rotation: number): void {
+    const width = imgElement.naturalWidth;
+    const height = imgElement.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas dimensions based on rotation
+    if (rotation === 90 || rotation === 270) {
+      canvas.width = height;
+      canvas.height = width;
+    } else {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    // Apply rotation transformation
+    ctx.save();
+    switch (rotation) {
+      case 90:
+        ctx.translate(height, 0);
+        ctx.rotate((90 * Math.PI) / 180);
+        break;
+      case 180:
+        ctx.translate(width, height);
+        ctx.rotate((180 * Math.PI) / 180);
+        break;
+      case 270:
+        ctx.translate(0, width);
+        ctx.rotate((270 * Math.PI) / 180);
+        break;
+      default:
+        break;
+    }
+
+    // Draw the image
+    ctx.drawImage(imgElement, 0, 0);
+    ctx.restore();
+  }
+  /**
+   * Rotate image by 90 degrees clockwise.
+   */
+  rotateImage() {
+    const rotation = (this.imageRotation() + 90) % 360;
+    this.imageRotation.set(rotation);
+    this.clearCroppedDetections();
+
+    // Redraw the canvas with the new rotation
+    if (this.imageUrl()) {
+      const img = this.imageRef.nativeElement;
+      const canvas = this.canvasRef.nativeElement;
+      this.drawImageOnCanvas(canvas, img, rotation);
+    }
+  }
+
+  /**
+   * Create a canvas with rotated image data based on the rotation angle.
+   */
+  private getRotatedCanvas(imgElement: HTMLImageElement, rotation: number): HTMLCanvasElement {
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    if (!ctx) return tempCanvas;
+
+    const width = imgElement.naturalWidth;
+    const height = imgElement.naturalHeight;
+
+    // Set canvas dimensions based on rotation
+    if (rotation === 90 || rotation === 270) {
+      tempCanvas.width = height;
+      tempCanvas.height = width;
+    } else {
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+    }
+
+    // Apply rotation transformation
+    ctx.save();
+    switch (rotation) {
+      case 90:
+        ctx.translate(height, 0);
+        ctx.rotate((90 * Math.PI) / 180);
+        break;
+      case 180:
+        ctx.translate(width, height);
+        ctx.rotate((180 * Math.PI) / 180);
+        break;
+      case 270:
+        ctx.translate(0, width);
+        ctx.rotate((270 * Math.PI) / 180);
+        break;
+      default:
+        break;
+    }
+
+    // Draw the image
+    ctx.drawImage(imgElement, 0, 0);
+    ctx.restore();
+
+    return tempCanvas;
   }
 
   /**
@@ -182,6 +292,8 @@ export class ImageDetectorComponent implements OnInit {
     // Réinitialiser aussi le score
     this.totalScore.set(0);
     this.calculationDetails.set([]);
+    this.errorMessage.set(undefined);
+    this.warningMessage.set(undefined);
   }
 
   async detectImage() {
@@ -193,16 +305,32 @@ export class ImageDetectorComponent implements OnInit {
     this.clearCroppedDetections();
 
     try {
-      // 1. Détection de scène (card, temple)
-      const sceneResults = await this.tfService.detect(this.imageRef.nativeElement, this.SCENE_SCORE_THRESHOLD, this.SCENE_MODEL_NAME);
+      // Get the image element and create a rotated canvas if needed
+      const imgElement = this.imageRef.nativeElement;
+      const detectionCanvas = this.getRotatedCanvas(imgElement, this.imageRotation());
+
+      // 1. Détection de scène (card, temple) - use the rotated canvas
+      const sceneResults = await this.tfService.detect(detectionCanvas, this.SCENE_SCORE_THRESHOLD, this.SCENE_MODEL_NAME);
       if (!sceneResults) throw new Error("Échec de la détection de scène.");
 
       this.drawBoxes(sceneResults);
 
       // 2. Découper les deux types d'objets
       this.loadingMessage.set("2/4 Découpage des objets...");
-      const cardCrops = this.cropDetections(sceneResults, this.CLASS_CARD_ID, true);
-      const templeCrops = this.cropDetections(sceneResults, this.CLASS_TEMPLE_ID, false);
+      const cardCrops = this.cropDetections(sceneResults, this.CLASS_CARD_ID, true, detectionCanvas);
+      const templeCrops = this.cropDetections(sceneResults, this.CLASS_TEMPLE_ID, true, detectionCanvas);
+
+      // Vérification du nombre de cartes
+      if (cardCrops.length < 8) {
+        this.errorMessage.set(`Erreur : Seulement ${cardCrops.length} carte(s) détectée(s). 8 cartes minimum requises.`);
+        this.loadingMessage.set("Détection interrompue.");
+        this.isLoading.set(false);
+        return;
+      }
+
+      if (cardCrops.length > 8) {
+        this.warningMessage.set(`Attention : ${cardCrops.length} cartes ont été détectées (au lieu de 8).`);
+      }
 
       // 3. Analyser les cartes
       if (cardCrops.length > 0) {
@@ -377,11 +505,21 @@ export class ImageDetectorComponent implements OnInit {
     const canvas = this.canvasRef.nativeElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    this.clearCanvas();
+    // Redraw the preview image onto the canvas (preserves image when drawing boxes)
+    this.drawImageOnCanvas(canvas, this.imageRef.nativeElement, this.imageRotation());
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
-    ctx.font = '16px Arial';
-    ctx.lineWidth = 3;
+
+    // Calculate font size based on image resolution (scale relative to 1920px width)
+    const baseFontSize = 16;
+    const scaleFactor = Math.max(1, imgWidth / 1920);
+    const fontSize = Math.round(baseFontSize * scaleFactor);
+    const lineWidth = Math.round(4 * scaleFactor);
+    const padding = Math.round(4 * scaleFactor);
+
+    ctx.font = `${fontSize}px Arial`;
+    ctx.lineWidth = lineWidth;
+
     for (let i = 0; i < results.boxes.length; i++) {
       const score = results.scores[i];
       if (score < this.SCENE_SCORE_THRESHOLD) continue;
@@ -395,22 +533,21 @@ export class ImageDetectorComponent implements OnInit {
       const color = classId === this.CLASS_CARD_ID ? '#306EFF' : '#FF701F';
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
-      ctx.lineWidth = 4;
       ctx.strokeRect(left, top, width, height);
       const label = `${className}: ${Math.round(score * 100)}%`;
       const textWidth = ctx.measureText(label).width;
-      const textHeight = 16;
-      const padding = 4;
+      const textHeight = fontSize;
       ctx.fillRect(left - 1, top - (textHeight + padding * 2), textWidth + padding * 2, textHeight + padding * 2);
       ctx.fillStyle = '#FFFFFF';
       ctx.fillText(label, left + padding, top - padding);
     }
   }
 
-  cropDetections(results: DetectionResult, targetClassId: number, sortLeftToRight: boolean): { url: string, canvas: HTMLCanvasElement }[] {
-    const img = this.imageRef.nativeElement;
-    const imgWidth = img.naturalWidth;
-    const imgHeight = img.naturalHeight;
+  cropDetections(results: DetectionResult, targetClassId: number, sortLeftToRight: boolean, source?: HTMLImageElement | HTMLCanvasElement): { url: string, canvas: HTMLCanvasElement }[] {
+    // Use provided source (rotated canvas) when available, otherwise fallback to original image element
+    const src = source || this.imageRef.nativeElement;
+    const imgWidth = (src as HTMLImageElement).naturalWidth || (src as HTMLCanvasElement).width;
+    const imgHeight = (src as HTMLImageElement).naturalHeight || (src as HTMLCanvasElement).height;
     const detections = results.boxes
       .map((box, i) => {
         const classId = results.classes[i];
@@ -437,7 +574,7 @@ export class ImageDetectorComponent implements OnInit {
       const tempCtx = tempCanvas.getContext('2d');
       if (tempCtx) {
         tempCtx.drawImage(
-          img,
+          src as any,
           detection.left, detection.top, detection.width, detection.height,
           0, 0, detection.width, detection.height
         );

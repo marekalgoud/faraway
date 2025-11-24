@@ -20,6 +20,16 @@
           >
           Détecter Objets
         </button>
+        <button
+          type="button"
+          (click)="rotateImage()"
+          [disabled]="!imageSelected()"
+          class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+          [ngClass]="{'bg-amber-600 hover:bg-amber-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+          title="Rotate image 90° clockwise"
+          >
+          ↻ Rotation
+        </button>
       </div>
 
       @if (isLoading()) {
@@ -30,22 +40,34 @@
         </div>
       }
 
-      <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8">
+      @if (errorMessage()) {
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          <strong>Erreur:</strong> {{ errorMessage() }}
+        </div>
+      }
+
+      @if (warningMessage()) {
+        <div class="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+          <strong>Attention:</strong> {{ warningMessage() }}
+        </div>
+      }
+
+      <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8" style="min-height:8rem;">
         <img #imageElement
           [src]="imageUrl()"
           alt="Image chargée pour détection"
           (load)="onImageLoaded()"
-          class="w-full h-auto object-contain"
-          [ngClass]="{'hidden': !imageUrl()}"
+          class="hidden"
           >
           <canvas #canvas
-          class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-          @if (!imageUrl()) {
-            <div class="flex items-center justify-center h-64 text-gray-500">
+            class="preview-canvas w-full h-auto block"
+            [style.opacity]="imageUrl() ? '1' : '0'"
+            ></canvas>
+            <div class="placeholder absolute inset-0 flex items-center justify-center text-gray-500"
+                 [style.opacity]="imageUrl() ? '0' : '1'">
               Veuillez sélectionner une image (JPG ou PNG).
             </div>
-          }
-        </div>
+      </div>
         <!-- FORMULAIRE PRINCIPAL -->
         <form [formGroup]="detectorForm">
           @if (cardsFormArray.controls.length > 0) {

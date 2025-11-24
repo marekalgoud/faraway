@@ -1,12 +1,5 @@
 import { Injectable } from '@angular/core';
 
-// --- (Importez vos constantes depuis le nouveau fichier) ---
-import {
-  CARD_COLOR_CLASSES,
-  CARD_OPTION_CLASSES,
-  TEMPLE_COLOR_CLASSES
-} from '../constants';
-
 // Interface pour le résultat
 export interface ScoreCalculation {
   score: number;
@@ -42,7 +35,8 @@ export class ScoreCalculatorService {
       const cardName = `Carte ${i + 1}`;
       details.push(`[${cardName}]`);
 
-      const visibleSet = [...visibleCards, ...allTemples];
+      // Include the card itself in the visible set for multiplier calculation
+      const visibleSet = [card, ...visibleCards, ...allTemples];
 
       let cardValue = this.parseValue(card.value);
       let cardScore = 0;
@@ -72,7 +66,7 @@ export class ScoreCalculatorService {
 
     // 2. Calculer le score des temples
     details.push("--- CALCUL DES TEMPLES ---");
-    const visibleSetForTemples = [...allCards];
+    const visibleSetForTemples = [...allCards, ...allTemples];
 
     for (let i = 0; i < allTemples.length; i++) {
       const temple = allTemples[i];
@@ -185,11 +179,13 @@ export class ScoreCalculatorService {
       case 'each_blue_or_yellow':
         return (visibleCounts['card_blue'] || 0) + (visibleCounts['card_yellow'] || 0);
       case 'each_all_colors':
-        // Count only the four standard colors; `card_gray` is neutral and excluded.
-        return (visibleCounts['card_blue'] || 0) +
-               (visibleCounts['card_green'] || 0) +
-               (visibleCounts['card_red'] || 0) +
-               (visibleCounts['card_yellow'] || 0);
+        // Count how many full sets of the four standard colors exist.
+        // Example: if counts are {blue:2, red:2, green:2, yellow:2} -> return 2
+        const b = visibleCounts['card_blue'] || 0;
+        const g = visibleCounts['card_green'] || 0;
+        const r = visibleCounts['card_red'] || 0;
+        const y = visibleCounts['card_yellow'] || 0;
+        return Math.min(b, g, r, y);
       default:
         return 0;
     }

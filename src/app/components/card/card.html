@@ -52,7 +52,7 @@
             <span class="font-semibold">Multiplicateur:</span>
             <span class="font-medium">
               @let multiplicator = formatLabel(cardForm().get('multiplier')?.value);
-              <img width="20" [src]="'/images/'+ multiplicator + '.png'" [alt]="multiplicator" [title]="multiplicator">
+              <img width="20" [src]="'/images/'+ formatLabelImage(multiplicator) + '.png'" [alt]="multiplicator" [title]="multiplicator">
             </span>
           </div>
         }

@@ -142,4 +142,8 @@ export class Card implements OnInit, OnDestroy {
       .join(' ');
   }
 
+  formatLabelImage(label: string | null): string {
+    return label ? label.replace(/ /g, '_') : '';
+  }
+
 }
