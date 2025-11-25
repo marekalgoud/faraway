@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild, inject, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 // ... (imports inchangés)
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Card } from '../../components/card/card';
 import { Temple } from '../../components/temple/temple';
 import { TensorflowService, DetectionResult } from '../../services/tensorFlow.service';
@@ -47,6 +48,7 @@ export class ImageDetectorComponent implements OnInit {
   private tfService = inject(TensorflowService);
   private fb = inject(FormBuilder);
   private scoreService = inject(ScoreCalculatorService);
+  private router = inject(Router);
 
   // --- Signals ---
   isLoading = signal(true);
@@ -85,7 +87,9 @@ export class ImageDetectorComponent implements OnInit {
   private readonly CLASS_TEMPLE_ID = 1;
 
   ngOnInit() {
-    this.initializeModels();
+    // Les modèles sont chargés au démarrage de l'application
+    this.isLoading.set(false);
+    this.loadingMessage.set("Prêt à détecter.");
   }
 
   // --- (Helpers pour le template inchangés) ---
@@ -112,25 +116,7 @@ export class ImageDetectorComponent implements OnInit {
     return arr[index].url || '';
   }
 
-  /**
-   * Charge les TROIS modèles TensorFlow.js au démarrage.
-   */
-  initializeModels() {
-    this.loadingMessage.set("Chargement des 3 modèles...");
-    const loadScene = this.tfService.loadModel(this.SCENE_MODEL_PATH, this.SCENE_MODEL_NAME, 640);
-    const loadCard = this.tfService.loadModel(this.CARD_MODEL_PATH, this.CARD_MODEL_NAME, 640);
-    const loadTemple = this.tfService.loadModel(this.TEMPLE_MODEL_PATH, this.TEMPLE_MODEL_NAME, 640);
 
-    Promise.all([loadScene, loadCard, loadTemple]) // Attend les 3
-      .then(() => {
-        this.loadingMessage.set("Prêt à détecter.");
-        this.isLoading.set(false);
-      })
-      .catch(err => {
-        console.error("Échec du chargement des modèles:", err);
-        this.loadingMessage.set("Erreur de chargement d'un modèle.");
-      });
-  }
 
   /**
    * Gère la sélection d'un fichier.
@@ -665,5 +651,13 @@ export class ImageDetectorComponent implements OnInit {
       }
     }
     return croppedDetections;
+  }
+
+  goToHome() {
+    this.router.navigate(['/']);
+  }
+
+  goToScore() {
+    this.router.navigate(['/score']);
   }
 }

@@ -1,0 +1,104 @@
+<div class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-6">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- En-tête -->
+    <div class="mb-8">
+      <h1 class="text-4xl md:text-6xl font-bold text-white text-center mb-4">
+        Tableau des Scores
+      </h1>
+      <div class="flex gap-4 justify-center">
+        <button
+          (click)="goToHome()"
+          class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition duration-200"
+          >
+          🏠 Accueil
+        </button>
+        <button
+          (click)="goToDetection()"
+          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-200"
+          >
+          📷 Aller à la détection
+        </button>
+      </div>
+    </div>
+
+    <!-- Tableau des scores -->
+    <div class="bg-white text-gray-900 bg-opacity-10 backdrop-blur-md rounded-xl p-4 shadow-2xl border border-white border-opacity-20">
+      <form [formGroup]="scoreForm">
+        <div class="flex">
+          <!-- Colonne fixe des rounds -->
+          <div class="flex-shrink-0">
+            <table>
+              <thead>
+                <tr class="border-b border-white border-opacity-30">
+                  <th class="p-3 text-left font-bold text-lg">Round</th>
+                </tr>
+              </thead>
+              <tbody formArrayName="scores">
+                @for (roundNum of getRoundNumbers(); track roundNum; let j = $index) {
+                  <tr class="border-b border-white border-opacity-20 hover:bg-white hover:bg-opacity-5">
+                    <td class="p-3 font-semibold whitespace-nowrap">Round {{ roundNum }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="border-t-2 border-white border-opacity-50">
+                  <td class="p-3 font-bold text-lg whitespace-nowrap">Victoires</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Colonne scrollable des joueurs -->
+          <div class="flex-1 overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-white border-opacity-30">
+                  @for (player of players(); track player) {
+                    <th class="p-3 text-center font-bold text-lg">{{ player }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody formArrayName="scores">
+                @for (roundNum of getRoundNumbers(); track roundNum; let j = $index) {
+                  <tr class="border-b border-white border-opacity-20 hover:bg-white hover:bg-opacity-5">
+                    @for (player of players(); track player; let i = $index) {
+                      <td class="p-2 text-center">
+                        <input
+                          type="number"
+                          [formControl]="getScoreControl(i, j)"
+                          [class]="isRoundWinner(i, j) ? 'w-20 px-2 py-1 rounded bg-green-200 text-gray-900 text-center border-2 border-green-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500' : 'w-20 px-2 py-1 rounded bg-white text-gray-900 text-center border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'"
+                          min="0"
+                          >
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="border-t-2 border-white border-opacity-50">
+                  @for (player of players(); track player; let i = $index) {
+                    <td class="p-3 text-center font-bold text-xl bg-green-600 bg-opacity-30 text-white">
+                      {{ getPlayerWins(i) }} <span class="text-sm font-normal">({{ getPlayerAverage(i) }})</span>
+                    </td>
+                  }
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </form>
+
+      <!-- Bouton Ajouter un round -->
+      <div class="mt-6 text-center">
+        <button
+          (click)="addRound()"
+          class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg transition duration-200"
+          >
+          ➕ Ajouter un round
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

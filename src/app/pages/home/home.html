@@ -1,54 +1,93 @@
-<div class="bg-gray-900 min-h-screen text-white p-8 flex flex-col items-center font-sans">
+<div class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-6">
+  <div class="max-w-2xl w-full">
 
-  <h1 class="text-3xl font-bold mb-6">Capture de Carte</h1>
-  <p class="text-lg text-gray-400 mb-6">Pointez votre webcam vers la carte et cliquez sur "Capturer".</p>
+    <!-- Titre principal -->
+    <h1 class="text-6xl md:text-8xl font-bold text-white text-center mb-12 tracking-wider drop-shadow-2xl">
+      FARAWAY
+    </h1>
 
-  <div class="w-full max-w-lg bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Conteneur des boutons -->
+    <div class="space-y-4">
 
-    <!-- Conteneur pour la vidéo et le canvas -->
-    <div class="relative w-full aspect-video">
-      <!-- Le flux vidéo de la webcam -->
-      <video #videoElement
-             class="w-full h-full object-cover"
-             autoplay
-             playsinline
-             muted>
-      </video>
+      <!-- Bouton Reprendre la partie en cours -->
+      @if (hasCurrentGame()) {
+        <button
+          (click)="resumeGame()"
+          class="w-full py-4 px-8 bg-yellow-600 hover:bg-yellow-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
+          >
+          ▶️ Reprendre la partie en cours
+        </button>
+      }
 
-      <!-- Le canvas est caché. Il ne sert qu'à capturer l'image en coulisse. -->
-      <canvas #canvasElement class="hidden"></canvas>
-    </div>
+      <!-- Bouton Créer une nouvelle partie -->
+      <button
+        (click)="toggleNewGameForm()"
+        class="w-full py-4 px-8 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
+        >
+        {{ showNewGameForm() ? '✕ Annuler' : '🎮 Créer une nouvelle partie' }}
+      </button>
 
-    <!-- Section des contrôles -->
-    <div class="p-6">
-      <!-- Affichage d'une erreur si la webcam échoue -->
-      @if (errorMessage()) {
-        <div class="bg-red-800 border border-red-600 text-red-200 p-3 rounded-lg text-center">
-          <span class="font-semibold">Erreur :</span> {{ errorMessage() }}
+      <!-- Formulaire dynamique des joueurs -->
+      @if (showNewGameForm()) {
+        <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 shadow-2xl border border-white border-opacity-20">
+          <form [formGroup]="gameForm" (ngSubmit)="startGame()" class="space-y-4">
+
+            <h2 class="text-2xl font-semibold text-white mb-4">Joueurs (2-6)</h2>
+
+            <div formArrayName="players" class="space-y-3">
+              @for (control of playersArray.controls; track $index; let i = $index) {
+                <div class="flex items-center gap-2">
+                  <input
+                    [formControl]="control"
+                    type="text"
+                    [placeholder]="'Joueur ' + (i + 1)"
+                    class="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                  @if (canRemovePlayer) {
+                    <button
+                      type="button"
+                      (click)="removePlayer(i)"
+                      class="px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition duration-150"
+                      >
+                      ✕
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Bouton Ajouter un joueur -->
+            @if (canAddPlayer) {
+              <button
+                type="button"
+                (click)="addPlayer()"
+                class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-semibold transition duration-150"
+                >
+                + Ajouter un joueur
+              </button>
+            }
+
+            <!-- Bouton Démarrer -->
+            <button
+              type="submit"
+              [disabled]="!gameForm.valid"
+              class="w-full py-4 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white text-xl font-bold rounded-lg shadow-lg transition duration-200"
+              >
+              🚀 Démarrer la partie
+            </button>
+          </form>
         </div>
       }
 
-      <!-- Bouton de capture -->
-      <button (click)="capture()"
-              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold
-                     py-3 px-6 rounded-lg text-lg
-                     transition-colors duration-200 ease-in-out
-                     focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                     shadow-lg disabled:opacity-50"
-              [disabled]="!!errorMessage()">
-        Capturer l'image
+      <!-- Bouton Aller à la détection -->
+      <button
+        (click)="goToDetection()"
+        class="w-full py-4 px-8 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
+        >
+        📷 Aller à la détection
       </button>
+
     </div>
+
   </div>
-
-  <!-- Section pour afficher l'image capturée -->
-  @if (capturedImage()) {
-    <div class="mt-8 w-full max-w-lg">
-      <h2 class="text-2xl font-semibold mb-4 text-center">Image Capturée :</h2>
-      <img [src]="capturedImage()"
-           alt="Image capturée"
-           class="rounded-lg shadow-lg border-4 border-gray-700 w-full" />
-    </div>
-  }
-
 </div>
