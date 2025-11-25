@@ -3,34 +3,73 @@
 
   <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
 
-    <!-- ... (Contrôles d'Upload et Chargement inchangés) ... -->
-    <div class="flex flex-col sm:flex-row gap-4 mb-6 items-center">
-      <input
-        type="file"
-        (change)="onFileSelected($event)"
-        accept="image/*"
-        class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-        [disabled]="isLoading()"
-        >
-        <button
-          (click)="detectImage()"
-          [disabled]="!imageSelected() || isLoading()"
-          class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-          [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+    <!-- Contrôles d'Upload, Caméra et Actions -->
+    <div class="flex flex-col gap-4 mb-6">
+      <!-- Ligne 1: Upload et Caméra -->
+      <div class="flex flex-col sm:flex-row gap-4 items-center">
+        <input
+          #fileInput
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+          [disabled]="isLoading() || isCameraActive()"
           >
-          Détecter Objets
-        </button>
-        <button
-          type="button"
-          (click)="rotateImage()"
-          [disabled]="!imageSelected()"
-          class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-          [ngClass]="{'bg-amber-600 hover:bg-amber-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
-          title="Rotate image 90° clockwise"
-          >
-          ↻ Rotation
-        </button>
+
+        @if (!isCameraActive()) {
+          <button
+            type="button"
+            (click)="startCamera()"
+            [disabled]="isLoading()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+            [ngClass]="{'bg-purple-600 hover:bg-purple-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
+            >
+            📷 Ouvrir Caméra
+          </button>
+        }
+
+        @if (isCameraActive()) {
+          <button
+            type="button"
+            (click)="capturePhoto()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150"
+            >
+            📸 Capturer Photo
+          </button>
+          <button
+            type="button"
+            (click)="stopCamera()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition duration-150"
+            >
+            ✕ Fermer Caméra
+          </button>
+        }
       </div>
+
+      <!-- Ligne 2: Actions (Détection et Rotation) -->
+      @if (!isCameraActive()) {
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <button
+            (click)="detectImage()"
+            [disabled]="!imageSelected() || isLoading()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+            [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+            >
+            Détecter Objets
+          </button>
+          <button
+            type="button"
+            (click)="rotateImage()"
+            [disabled]="!imageSelected()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+            [ngClass]="{'bg-amber-600 hover:bg-amber-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+            title="Rotate image 90° clockwise"
+            >
+            ↻ Rotation
+          </button>
+        </div>
+      }
+    </div>
 
       @if (isLoading()) {
         <div
@@ -59,14 +98,30 @@
           (load)="onImageLoaded()"
           class="hidden"
           >
-          <canvas #canvas
-            class="preview-canvas w-full h-auto block"
-            [style.opacity]="imageUrl() ? '1' : '0'"
-            ></canvas>
-            <div class="placeholder absolute inset-0 flex items-center justify-center text-gray-500"
-                 [style.opacity]="imageUrl() ? '0' : '1'">
-              Veuillez sélectionner une image (JPG ou PNG).
+
+          <!-- Vidéo pour la caméra -->
+          @if (isCameraActive()) {
+            <video #videoElement
+              autoplay
+              playsinline
+              class="w-full h-auto block"
+              ></video>
+          }
+
+          <!-- Canvas pour l'image uploadée ou capturée -->
+          @if (!isCameraActive()) {
+            <canvas #canvas
+              class="preview-canvas w-full h-auto block"
+              [style.opacity]="imageUrl() ? '1' : '0'"
+              ></canvas>
+          }
+
+          <!-- Placeholder -->
+          @if (!isCameraActive() && !imageUrl()) {
+            <div class="placeholder absolute inset-0 flex items-center justify-center text-gray-500">
+              Veuillez sélectionner une image ou ouvrir la caméra.
             </div>
+          }
       </div>
         <!-- FORMULAIRE PRINCIPAL -->
         <form [formGroup]="detectorForm">

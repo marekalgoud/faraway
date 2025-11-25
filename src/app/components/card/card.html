@@ -52,14 +52,14 @@
             <span class="font-semibold">Multiplicateur:</span>
             <span class="font-medium">
               @let multiplicator = formatLabel(cardForm().get('multiplier')?.value);
-              <img width="20" [src]="'/images/'+ formatLabelImage(multiplicator) + '.png'" [alt]="multiplicator" [title]="multiplicator">
+              <img class="h-5 w-auto object-contain" [src]="'/images/'+ formatLabelImage(multiplicator) + '.png'" [alt]="multiplicator" [title]="multiplicator">
             </span>
           </div>
         }
         <!-- Options (Chimère, Gemme, Indice, Nuit, Chardon) -->
         <div class="flex items-center justify-between p-2">
           <span class="font-semibold block mb-2">Options:</span>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-1">
             @for (option of optionsArray.getRawValue(); track $index) {
               <span class="flex items-center">
                 <img width="20" [src]="'/images/'+ formatLabel(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
@@ -71,10 +71,10 @@
         @if (conditionsArray.length > 0) {
           <div class="flex items-center justify-between p-2">
             <span class="font-semibold block mb-2">Conditions:</span>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1">
               @for (condition of conditionsArray.getRawValue(); track $index) {
                 <span class="flex items-center">
-                  <img width="20" [src]="'/images/'+ formatLabel(condition) + '.png'" [alt]="formatLabel(condition)" [title]="formatLabel(condition)">
+                  <img width="16" [src]="'/images/'+ formatLabel(condition) + '.png'" [alt]="formatLabel(condition)" [title]="formatLabel(condition)">
                 </span>
               }
             </div>

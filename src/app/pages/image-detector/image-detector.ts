@@ -42,6 +42,7 @@ export class ImageDetectorComponent implements OnInit {
   // ... (ViewChilds, injections inchangés)
   @ViewChild('imageElement') imageRef!: ElementRef<HTMLImageElement>;
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('videoElement') videoRef?: ElementRef<HTMLVideoElement>;
 
   private tfService = inject(TensorflowService);
   private fb = inject(FormBuilder);
@@ -53,6 +54,8 @@ export class ImageDetectorComponent implements OnInit {
   imageUrl = signal<string | undefined>(undefined);
   imageSelected = signal(false);
   imageRotation = signal<number>(0); // 0, 90, 180, 270
+  isCameraActive = signal(false);
+  cameraStream = signal<MediaStream | undefined>(undefined);
 
   croppedCards = signal<CroppedFormItem[]>([]);
   croppedTemples = signal<CroppedFormItem[]>([]);
@@ -137,6 +140,7 @@ export class ImageDetectorComponent implements OnInit {
     const file = input.files?.[0];
 
     if (file) {
+      this.stopCamera(); // Arrêter la caméra si active
       this.isLoading.set(true);
       this.loadingMessage.set("Image sélectionnée...");
       this.clearCanvas();
@@ -156,6 +160,82 @@ export class ImageDetectorComponent implements OnInit {
       this.clearCanvas();
       this.clearCroppedDetections();
     }
+  }
+
+  /**
+   * Démarre la caméra du téléphone.
+   */
+  async startCamera() {
+    try {
+      this.stopCamera(); // Arrêter toute caméra existante
+      this.clearCanvas();
+      this.clearCroppedDetections();
+      this.imageUrl.set(undefined);
+      this.imageSelected.set(false);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' } // Caméra arrière par défaut
+      });
+
+      this.cameraStream.set(stream);
+      this.isCameraActive.set(true);
+
+      // Attendre que la vidéo soit prête
+      setTimeout(() => {
+        if (this.videoRef) {
+          this.videoRef.nativeElement.srcObject = stream;
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Erreur d\'accès à la caméra:', error);
+      this.errorMessage.set('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
+      this.isCameraActive.set(false);
+    }
+  }
+
+  /**
+   * Arrête la caméra.
+   */
+  stopCamera() {
+    const stream = this.cameraStream();
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      this.cameraStream.set(undefined);
+    }
+    this.isCameraActive.set(false);
+    if (this.videoRef) {
+      this.videoRef.nativeElement.srcObject = null;
+    }
+  }
+
+  /**
+   * Capture une photo depuis la caméra.
+   */
+  capturePhoto() {
+    if (!this.videoRef || !this.isCameraActive()) return;
+
+    const video = this.videoRef.nativeElement;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+
+    // Convertir en URL pour utilisation
+    const imageDataUrl = canvas.toDataURL('image/jpeg');
+    this.imageUrl.set(imageDataUrl);
+    this.imageSelected.set(true);
+    this.imageRotation.set(0);
+
+    // Arrêter la caméra après capture
+    this.stopCamera();
+
+    // Déclencher le chargement de l'image
+    this.isLoading.set(true);
+    this.loadingMessage.set("Photo capturée...");
   }
 
   /**

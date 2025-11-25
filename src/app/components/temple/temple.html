@@ -43,7 +43,7 @@
             <span class="font-semibold">Multiplicateur:</span>
             <span class="font-medium">
               @let multiplicator = formatLabel(templeForm.get('multiplier')?.value);
-              <img width="20" [src]="'/images/'+ multiplicator + '.png'" [alt]="multiplicator" [title]="multiplicator">
+              <img class="h-5 w-auto object-contain" [src]="'/images/'+ formatLabelImage(multiplicator) + '.png'" [alt]="multiplicator" [title]="multiplicator">
             </span>
           </div>
         }
@@ -52,7 +52,7 @@
           <div class="flex flex-wrap gap-2">
             @for (option of optionsArray.getRawValue(); track $index) {
               <span class="flex items-center">
-                <img width="20" [src]="'/images/'+ formatLabel(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
+                <img width="20" [src]="'/images/'+ formatLabelImage(formatLabel(option)) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
               </span>
             }
           </div>
@@ -81,7 +81,7 @@
           <select formControlName="value" class="w-full p-1 border rounded">
             <option value="">-- Aucune --</option>
             @for (val of valueOptions; track val) {
-              <option [value]="val">{{ val }}</option>
+              <option [value]="val">{{ formatLabel(val) }}</option>
             }
           </select>
         </div>
@@ -110,7 +110,7 @@
           <select formControlName="multiplier" class="w-full p-1 border rounded">
             <option value="">-- Aucun --</option>
             @for (mult of multiplierOptions; track mult) {
-              <option [value]="mult">{{ mult }}</option>
+              <option [value]="mult">{{ formatLabel(mult) }}</option>
             }
           </select>
         </div>

@@ -4,15 +4,16 @@ import { Subscription } from 'rxjs';
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
 
-// Classes du modèle d'analyse de cartes (pour les listes déroulantes)
-const COLOR_CLASSES = ['card_blue', 'card_green', 'card_red', 'card_yellow'];
+// Classes du modèle d'analyse de temples (basé sur metadata.yaml)
+const COLOR_CLASSES = ['card_blue', 'card_gray', 'card_green', 'card_red', 'card_yellow'];
 const VALUE_CLASSES = [
-  'value_1',  'value_2', 'value_5'
+  'value_1', 'value_2', 'value_4', 'value_5'
 ].sort(); // Trier pour l'affichage
 const MULTIPLIER_CLASSES = [
-  'each_all_colors', 'each_blue', 'each_chimera', 'each_gem', 'each_green',
-  'each_hint', 'each_night', 'each_red', 'each_thistle', 'each_yellow_or_blue',
-  'each_yellow_or_green', 'each_yellow_or_red', 'each_blue_or_yellow'
+  'each_all_colors', 'each_blue', 'each_blue_or_yellow', 'each_chimera', 'each_gem',
+  'each_green', 'each_green_or_blue', 'each_green_or_red', 'each_hint', 'each_night',
+  'each_red', 'each_red_or_blue', 'each_red_or_yellow', 'each_thistle', 'each_yellow',
+  'each_yellow_or_green'
 ].sort(); // Trier pour l'affichage
 // Les 'Options' sont gérées par un array maintenant
 
@@ -97,6 +98,10 @@ export class Temple implements OnInit, OnDestroy {
       .replace(/_/g, ' ')
       .split(' ')
       .join(' ');
+  }
+
+  formatLabelImage(label: string | null): string {
+    return label ? label.replace(/ /g, '_') : '';
   }
 
   toggleEdit() {
