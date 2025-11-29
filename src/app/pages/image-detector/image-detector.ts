@@ -160,7 +160,11 @@ export class ImageDetectorComponent implements OnInit {
       this.imageSelected.set(false);
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Caméra arrière par défaut
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 4096 },
+          height: { ideal: 2160 }
+        }
       });
 
       this.cameraStream.set(stream);
@@ -210,8 +214,8 @@ export class ImageDetectorComponent implements OnInit {
 
     ctx.drawImage(video, 0, 0);
 
-    // Convertir en URL pour utilisation
-    const imageDataUrl = canvas.toDataURL('image/jpeg');
+    // Convertir en URL pour utilisation avec une qualité maximale
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.98);
     this.imageUrl.set(imageDataUrl);
     this.imageSelected.set(true);
     this.imageRotation.set(0);
@@ -645,7 +649,7 @@ export class ImageDetectorComponent implements OnInit {
           0, 0, detection.width, detection.height
         );
         croppedDetections.push({
-            url: tempCanvas.toDataURL('image/jpeg', 0.95),
+            url: tempCanvas.toDataURL('image/jpeg', 0.98),
             canvas: tempCanvas
         });
       }

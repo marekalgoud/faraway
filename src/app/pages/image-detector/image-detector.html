@@ -16,7 +16,7 @@
 
   <h1 class="text-3xl font-bold text-center text-white mb-6">Détecteur de Scène & Analyse de Cartes</h1>
 
-  <div class="max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-xl shadow-2xl border border-white border-opacity-20">
+  <div class="max-w-6xl mx-auto bg-white bg-opacity-10 p-6 rounded-xl shadow-2xl border border-white border-opacity-20">
 
     <!-- Contrôles d'Upload, Caméra et Actions -->
     <div class="flex flex-col gap-4 mb-6">
@@ -106,6 +106,32 @@
         </div>
       }
 
+      <!-- Caméra en plein écran -->
+      @if (isCameraActive()) {
+        <div class="camera-fullscreen">
+          <video #videoElement
+            autoplay
+            playsinline
+            ></video>
+          <div class="camera-controls">
+            <button
+              type="button"
+              (click)="capturePhoto()"
+              class="px-8 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150"
+              >
+              📸 Capturer
+            </button>
+            <button
+              type="button"
+              (click)="stopCamera()"
+              class="px-8 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition duration-150"
+              >
+              ✕ Fermer
+            </button>
+          </div>
+        </div>
+      }
+
       <div class="relative w-full overflow-hidden border-4 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-8" style="min-height:8rem;">
         <img #imageElement
           [src]="imageUrl()"
@@ -114,25 +140,14 @@
           class="hidden"
           >
 
-          <!-- Vidéo pour la caméra -->
-          @if (isCameraActive()) {
-            <video #videoElement
-              autoplay
-              playsinline
-              class="w-full h-auto block"
-              ></video>
-          }
-
           <!-- Canvas pour l'image uploadée ou capturée -->
-          @if (!isCameraActive()) {
-            <canvas #canvas
-              class="preview-canvas w-full h-auto block"
-              [style.opacity]="imageUrl() ? '1' : '0'"
-              ></canvas>
-          }
+          <canvas #canvas
+            class="preview-canvas w-full h-auto block"
+            [style.opacity]="imageUrl() ? '1' : '0'"
+            ></canvas>
 
           <!-- Placeholder -->
-          @if (!isCameraActive() && !imageUrl()) {
+          @if (!imageUrl()) {
             <div class="placeholder absolute inset-0 flex items-center justify-center text-gray-500">
               Veuillez sélectionner une image ou ouvrir la caméra.
             </div>
