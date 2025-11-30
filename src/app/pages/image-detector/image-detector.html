@@ -14,7 +14,7 @@
     </button>
   </div>
 
-  <h1 class="text-3xl font-bold text-center text-white mb-6">Détecteur de Scène & Analyse de Cartes</h1>
+  <h1 class="font-heading uppercase text-3xl font-bold text-center text-white mb-6">Détecteur de Scène & Analyse de Cartes</h1>
 
   <div class="max-w-6xl mx-auto bg-white bg-opacity-10 p-6 rounded-xl shadow-2xl border border-white border-opacity-20">
 
@@ -157,7 +157,7 @@
         <form [formGroup]="detectorForm">
           @if (cardsFormArray.controls.length > 0) {
             <div class="mt-4">
-              <h2 class="text-xl font-semibold text-indigo-800 mb-4">Cartes</h2>
+              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">Cartes</h2>
               <div formArrayName="cards">
                 <swiper-container
                 navigation="false"
@@ -190,7 +190,7 @@
 
           @if (templesFormArray.controls.length > 0) {
             <div class="mt-4">
-              <h2 class="text-xl font-semibold text-indigo-800 mb-4">Temples</h2>
+              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">Temples</h2>
               <div formArrayName="temples">
                 <swiper-container
                 navigation="false"
@@ -235,13 +235,13 @@
             <!-- Zone d'affichage des résultats -->
             @if (calculationDetails().length > 0) {
               <div class="mt-6 p-4 bg-gray-800 text-gray-100 rounded-lg shadow-inner">
-                <h3 class="text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
+                <h3 class="font-heading uppercase text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
                 <div class="font-mono text-sm whitespace-pre-wrap">
                   @for (detail of calculationDetails(); track detail) {
                     <div>{{ detail }}</div>
                   }
                 </div>
-                <h2 class="text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
+                <h2 class="font-heading uppercase text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
                   Score Total: {{ totalScore() }}
                 </h2>
               </div>

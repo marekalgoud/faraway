@@ -12,6 +12,8 @@ export interface DetectionResult {
 }
 
 
+import { signal } from '@angular/core';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,6 +30,13 @@ export class TensorflowService {
   // Utilisation d'une Map pour gérer les promesses de chargement
   private loadingPromises: Map<string, Promise<void>> = new Map();
 
+  // Signaux pour suivre l'état de chargement
+  public isLoadingModels = signal(false);
+  public loadingProgress = signal(0);
+  public loadingMessage = signal('');
+  private totalModels = 0;
+  private loadedModels = 0;
+
   constructor() {
     tf.setBackend('webgl').catch(() => tf.setBackend('cpu'));
   }
@@ -42,11 +51,13 @@ export class TensorflowService {
 
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
+        this.loadingMessage.set(`Chargement ${modelName}...`);
         console.log(`Chargement du modèle '${modelName}' depuis:`, modelUrl);
         const model = await tf.loadGraphModel(modelUrl);
         this.models.set(modelName, model);
         console.log(`Modèle '${modelName}' chargé.`);
 
+        this.loadingMessage.set(`Initialisation ${modelName}...`);
         // Échauffement (Warmup)
         tf.tidy(() => {
           const dummyInput = tf.zeros([1, inputSize, inputSize, 3], 'float32');
@@ -54,6 +65,8 @@ export class TensorflowService {
         });
 
         console.log(`Modèle '${modelName}' prêt.`);
+        this.loadedModels++;
+        this.loadingProgress.set(Math.round((this.loadedModels / this.totalModels) * 100));
         resolve();
       } catch (error) {
         console.error(`Erreur lors du chargement du modèle '${modelName}':`, error);
@@ -65,6 +78,26 @@ export class TensorflowService {
 
     this.loadingPromises.set(modelName, promise);
     return promise;
+  }
+
+  /**
+   * Initialise le chargement de plusieurs modèles et suit la progression
+   */
+  public async loadModels(models: Array<{url: string, name: string, size: number}>): Promise<void> {
+    this.isLoadingModels.set(true);
+    this.totalModels = models.length;
+    this.loadedModels = 0;
+    this.loadingProgress.set(0);
+
+    try {
+      await Promise.all(models.map(m => this.loadModel(m.url, m.name, m.size)));
+      this.loadingMessage.set('Modèles prêts !');
+    } catch (error) {
+      this.loadingMessage.set('Erreur de chargement');
+      throw error;
+    } finally {
+      this.isLoadingModels.set(false);
+    }
   }
 
   /**

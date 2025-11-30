@@ -171,13 +171,23 @@ export class ScoreCalculatorService {
       case 'each_red': return visibleCounts['card_red'] || 0;
       // Combinaisons
       case 'each_yellow_or_blue':
+      case 'each_blue_or_yellow':
         return (visibleCounts['card_yellow'] || 0) + (visibleCounts['card_blue'] || 0);
       case 'each_yellow_or_green':
+      case 'each_green_or_yellow':
         return (visibleCounts['card_yellow'] || 0) + (visibleCounts['card_green'] || 0);
       case 'each_yellow_or_red':
+      case 'each_red_or_yellow':
         return (visibleCounts['card_yellow'] || 0) + (visibleCounts['card_red'] || 0);
-      case 'each_blue_or_yellow':
-        return (visibleCounts['card_blue'] || 0) + (visibleCounts['card_yellow'] || 0);
+      case 'each_green_or_blue':
+      case 'each_blue_or_green':
+        return (visibleCounts['card_green'] || 0) + (visibleCounts['card_blue'] || 0);
+      case 'each_green_or_red':
+      case 'each_red_or_green':
+        return (visibleCounts['card_green'] || 0) + (visibleCounts['card_red'] || 0);
+      case 'each_red_or_blue':
+      case 'each_blue_or_red':
+        return (visibleCounts['card_red'] || 0) + (visibleCounts['card_blue'] || 0);
       case 'each_all_colors':
         // Count how many full sets of the four standard colors exist.
         // Example: if counts are {blue:2, red:2, green:2, yellow:2} -> return 2

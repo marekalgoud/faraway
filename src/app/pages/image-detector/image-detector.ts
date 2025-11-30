@@ -76,12 +76,9 @@ export class ImageDetectorComponent implements OnInit {
 
   // --- (Configuration des modèles inchangée) ---
   private readonly SCENE_MODEL_NAME = 'SCENE_MODEL';
-  private readonly SCENE_MODEL_PATH = '/model/set/model.json';
   private readonly CARD_MODEL_NAME = 'CARD_MODEL';
-  private readonly CARD_MODEL_PATH = '/model/card/model.json';
   private readonly TEMPLE_MODEL_NAME = 'TEMPLE_MODEL';
-  private readonly TEMPLE_MODEL_PATH = '/model/temple/model.json';
-  private readonly ANALYSIS_THRESHOLD = 0.1;
+  private readonly ANALYSIS_THRESHOLD = 0.15;
   private readonly SCENE_SCORE_THRESHOLD = 0.2;
   private readonly CLASS_CARD_ID = 0;
   private readonly CLASS_TEMPLE_ID = 1;
@@ -415,6 +412,11 @@ export class ImageDetectorComponent implements OnInit {
       }
 
       this.loadingMessage.set("Analyse terminée !");
+
+      // Auto-calculate le score après la détection
+      if (cardCrops.length >= 8) {
+        this.calculateScore();
+      }
 
     } catch (error) {
       console.error("Erreur critique lors de la détection:", error);

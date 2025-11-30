@@ -1,1 +1,77 @@
+<!-- Écran de chargement des modèles -->
+@if (isLoadingModels()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+    <div class="bg-white bg-opacity-10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white border-opacity-20 max-w-md w-full mx-4">
+      <div class="text-center">
+        <div class="mb-6">
+          <svg class="animate-spin h-16 w-16 mx-auto text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        
+        <h2 class="font-heading uppercase font-bold mb-4">Chargement des modèles IA</h2>
+        
+        <p class="text-opacity-80 mb-6">{{ loadingMessage() }}</p>
+        
+        <!-- Barre de progression -->
+        <div class="w-full bg-white bg-opacity-20 rounded-full h-3 mb-2">
+          <div 
+            class="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-300 ease-out"
+            [style.width.%]="loadingProgress()"
+          ></div>
+        </div>
+        
+        <p class="text-white text-sm">{{ loadingProgress() }}%</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Indicateur hors ligne -->
+@if (!isOnline()) {
+  <div class="fixed top-0 left-0 right-0 z-40 bg-yellow-500 text-black px-4 py-2 text-center text-sm font-semibold">
+    ⚠️ Mode hors ligne - Certaines fonctionnalités peuvent être limitées
+  </div>
+}
+
+<!-- Bannière de mise à jour disponible -->
+@if (updateAvailable()) {
+  <div class="fixed top-0 left-0 right-0 z-40 bg-blue-600 text-white px-4 py-3 text-center">
+    <p class="text-sm font-semibold mb-2">🎉 Mise à jour disponible !</p>
+    <button 
+      (click)="updateApp()"
+      class="px-4 py-1 bg-white text-blue-600 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
+    >
+      Mettre à jour maintenant
+    </button>
+  </div>
+}
+
+<!-- Bannière d'installation PWA -->
+@if (showInstallBanner() && canInstall()) {
+  <div class="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 shadow-2xl">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex-1">
+        <p class="font-bold mb-1">📱 Installer Faraway</p>
+        <p class="text-sm text-white text-opacity-90">Accès rapide et utilisation hors ligne !</p>
+      </div>
+      <div class="flex gap-2">
+        <button 
+          (click)="installApp()"
+          class="px-6 py-2 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition"
+        >
+          Installer
+        </button>
+        <button 
+          (click)="dismissInstallBanner()"
+          class="px-4 py-2 bg-white text-indigo-600 font-semibold bg-opacity-20 rounded-lg hover:bg-opacity-30 transition"
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <router-outlet />
