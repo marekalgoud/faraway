@@ -156,21 +156,63 @@ export class ImageDetectorComponent implements OnInit {
       this.imageUrl.set(undefined);
       this.imageSelected.set(false);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 4096 },
-          height: { ideal: 2160 }
+      // Demander la résolution maximale disponible
+      // Essayer d'abord 8K, puis 4K, puis Full HD
+      const resolutions = [
+        { width: 7680, height: 4320, name: '8K' },
+        { width: 4096, height: 2160, name: '4K' },
+        { width: 1920, height: 1080, name: 'Full HD' }
+      ];
+
+      let stream: MediaStream | null = null;
+      let usedResolution = '';
+
+      for (const resolution of resolutions) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: resolution.width },
+              height: { ideal: resolution.height },
+              // Demander la meilleure qualité possible
+              frameRate: { ideal: 30 },
+              aspectRatio: { ideal: 16/9 }
+            }
+          });
+          usedResolution = resolution.name;
+          console.log(`Caméra démarrée en ${resolution.name} (${resolution.width}×${resolution.height})`);
+          break;
+        } catch (e) {
+          console.log(`Résolution ${resolution.name} non disponible, essai suivant...`);
+          continue;
         }
-      });
+      }
+
+      if (!stream) {
+        throw new Error('Impossible de démarrer la caméra avec aucune résolution');
+      }
 
       this.cameraStream.set(stream);
       this.isCameraActive.set(true);
 
-      // Attendre que la vidéo soit prête
+      // Attendre que la vidéo soit prête et afficher la résolution réelle
       setTimeout(() => {
         if (this.videoRef) {
-          this.videoRef.nativeElement.srcObject = stream;
+          const video = this.videoRef.nativeElement;
+          video.srcObject = stream;
+          
+          video.onloadedmetadata = () => {
+            const actualWidth = video.videoWidth;
+            const actualHeight = video.videoHeight;
+            console.log(`Résolution réelle obtenue: ${actualWidth}×${actualHeight}`);
+            
+            // Afficher un message informatif à l'utilisateur
+            if (actualWidth >= 3840) {
+              console.log('✅ Qualité 4K+ détectée - Excellente pour la détection');
+            } else if (actualWidth >= 1920) {
+              console.log('✅ Qualité Full HD détectée - Bonne pour la détection');
+            }
+          };
         }
       }, 100);
     } catch (error) {
