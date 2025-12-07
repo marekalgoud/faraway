@@ -65,6 +65,7 @@ export class ImageDetectorComponent implements OnInit {
   // NOUVEAU: Signals pour le résultat du calcul
   totalScore = signal<number>(0);
   calculationDetails = signal<string[]>([]);
+  scoreRounds = signal<any[]>([]);
   errorMessage = signal<string | undefined>(undefined);
   warningMessage = signal<string | undefined>(undefined);
 
@@ -515,6 +516,7 @@ export class ImageDetectorComponent implements OnInit {
     // Mettre à jour les signaux pour l'affichage
     this.totalScore.set(result.score);
     this.calculationDetails.set(result.details);
+    this.scoreRounds.set(result.rounds);
   }
 
   /**

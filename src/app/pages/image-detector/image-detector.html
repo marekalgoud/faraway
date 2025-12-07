@@ -233,17 +233,38 @@
               Calculer le Score
             </button>
             <!-- Zone d'affichage des résultats -->
-            @if (calculationDetails().length > 0) {
-              <div class="mt-6 p-4 bg-gray-800 text-gray-100 rounded-lg shadow-inner">
-                <h3 class="font-heading uppercase text-lg font-semibold text-green-300 mb-3">Détail du Calcul</h3>
-                <div class="font-mono text-sm whitespace-pre-wrap">
-                  @for (detail of calculationDetails(); track detail) {
-                    <div>{{ detail }}</div>
-                  }
+            @if (scoreRounds().length > 0) {
+              <div class="mt-6 bg-gray-800 rounded-lg shadow-inner overflow-hidden">
+                <h3 class="font-heading uppercase text-lg font-semibold text-green-300 p-4 pb-3">Détail du Calcul</h3>
+                
+                <!-- Tableau -->
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-gray-700 text-gray-100">
+                      <tr>
+                        <th class="px-4 py-3 text-left font-semibold">Round</th>
+                        <th class="px-4 py-3 text-center font-semibold">Score</th>
+                        <th class="px-4 py-3 text-left font-semibold">Détail du calcul</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                      @for (round of scoreRounds(); track round.round) {
+                        <tr class="hover:bg-gray-700/50 transition" [class.bg-green-900/30]="round.round === 'Temples'">
+                          <td class="px-4 py-3 text-gray-200 font-medium">{{ round.round }}</td>
+                          <td class="px-4 py-3 text-center text-green-400 font-bold">{{ round.score }}</td>
+                          <td class="px-4 py-3 text-gray-300 font-mono text-xs">{{ round.details }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
                 </div>
-                <h2 class="font-heading uppercase text-2xl font-bold text-white text-center mt-4 border-t border-gray-600 pt-4">
-                  Score Total: {{ totalScore() }}
-                </h2>
+                
+                <!-- Score total -->
+                <div class="bg-gray-900 p-4 border-t-2 border-green-500">
+                  <h2 class="font-heading uppercase text-2xl font-bold text-white text-center">
+                    Score Total: <span class="text-green-400">{{ totalScore() }}</span>
+                  </h2>
+                </div>
               </div>
             }
           </div>

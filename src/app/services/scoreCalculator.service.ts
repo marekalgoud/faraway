@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 
+// Interface pour un round de calcul
+export interface ScoreRound {
+  round: string;
+  score: number;
+  details: string;
+}
+
 // Interface pour le résultat
 export interface ScoreCalculation {
   score: number;
+  rounds: ScoreRound[];
   details: string[];
 }
 
@@ -24,16 +32,16 @@ export class ScoreCalculatorService {
    */
   public calculate(allCards: any[], allTemples: any[]): ScoreCalculation {
     const details: string[] = [];
+    const rounds: ScoreRound[] = [];
     let score = 0;
 
     // 1. Calculer le score des cartes (en ordre inverse)
-    details.push("--- CALCUL DES CARTES (de droite à gauche) ---");
     let visibleCards: any[] = []; // Cartes déjà vues (celles de droite)
 
     for (let i = allCards.length - 1; i >= 0; i--) {
       const card = allCards[i];
-      const cardName = `Carte ${i + 1}`;
-      details.push(`[${cardName}]`);
+      const roundNumber = allCards.length - i;
+      const cardDetails: string[] = [];
 
       // Include the card itself in the visible set for multiplier calculation
       const visibleSet = [card, ...visibleCards, ...allTemples];
@@ -43,35 +51,46 @@ export class ScoreCalculatorService {
 
       // 1a. Vérifier les conditions
       const conditions = (card.conditions || []).filter((c: string) => c);
-      const conditionsMet = this.checkConditions(conditions, visibleSet, details, cardName);
+      const conditionsMet = this.checkConditions(conditions, visibleSet, cardDetails, `Carte ${i + 1}`);
 
       if (!conditionsMet) {
         cardValue = 0;
-        details.push(` -> Conditions non remplies. Valeur annulée.`);
+        cardDetails.push(`Conditions non remplies`);
       }
 
       // 1b. Appliquer le multiplicateur
       if (cardValue > 0 && card.multiplier) {
         const count = this.countMultiplier(card.multiplier, visibleSet);
         cardScore = cardValue * count;
-        details.push(` -> Multiplicateur (${card.multiplier}): ${cardValue} x ${count} = ${cardScore}pts`);
+        cardDetails.push(`${cardValue} x ${count} = ${cardScore}pts`);
       } else {
         cardScore = cardValue;
-        details.push(` -> Score de base: ${cardScore}pts`);
+        cardDetails.push(`Score de base: ${cardScore}pts`);
       }
 
       score += cardScore;
       visibleCards.push(card);
+
+      // Ajouter le round
+      rounds.push({
+        round: `${roundNumber}`,
+        score: cardScore,
+        details: cardDetails.join(' | ')
+      });
+
+      // Garder aussi l'ancien format pour compatibilité
+      details.push(`[Carte ${i + 1}]`);
+      cardDetails.forEach(d => details.push(` -> ${d}`));
     }
 
     // 2. Calculer le score des temples
-    details.push("--- CALCUL DES TEMPLES ---");
     const visibleSetForTemples = [...allCards, ...allTemples];
+    let templesScore = 0;
+    const templesDetails: string[] = [];
 
     for (let i = 0; i < allTemples.length; i++) {
       const temple = allTemples[i];
-      const templeName = `Temple ${i + 1}`;
-      details.push(`[${templeName}]`);
+      const templeInfo: string[] = [];
 
       let templeValue = this.parseValue(temple.value);
       let templeScore = 0;
@@ -79,19 +98,33 @@ export class ScoreCalculatorService {
       if (templeValue > 0 && temple.multiplier) {
         const count = this.countMultiplier(temple.multiplier, visibleSetForTemples);
         templeScore = templeValue * count;
-        details.push(` -> Multiplicateur (${temple.multiplier}): ${templeValue} x ${count} = ${templeScore}pts`);
+        templeInfo.push(`T${i + 1}: ${templeValue} x ${count} = ${templeScore}pts`);
       } else {
         templeScore = templeValue;
-        details.push(` -> Score de base: ${templeScore}pts`);
+        templeInfo.push(`T${i + 1}: ${templeScore}pts`);
       }
 
-      score += templeScore;
+      templesScore += templeScore;
+      templesDetails.push(templeInfo.join(''));
+
+      // Ancien format
+      details.push(`[Temple ${i + 1}]`);
+      details.push(` -> Score: ${templeScore}pts`);
     }
+
+    score += templesScore;
+
+    // Ajouter le round des temples
+    rounds.push({
+      round: 'Temples',
+      score: templesScore,
+      details: templesDetails.join(' | ')
+    });
 
     details.push("---------------------------------");
     details.push(`SCORE TOTAL: ${score}`);
 
-    return { score, details };
+    return { score, rounds, details };
   }
 
   /**
