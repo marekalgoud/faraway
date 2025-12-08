@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/update-version.js",
     "start": "ng serve",
+    "prebuild": "node scripts/update-version.js",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
@@ -12,7 +14,8 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:patch": "release-it patch",
-    "release:dry": "release-it --dry-run"
+    "release:dry": "release-it --dry-run",
+    "version:update": "node scripts/update-version.js"
   },
   "prettier": {
     "printWidth": 100,

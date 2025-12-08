@@ -2,10 +2,11 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TensorflowService } from './services/tensorFlow.service';
 import { PwaService } from './services/pwa.service';
+import { Footer } from './components/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Footer],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

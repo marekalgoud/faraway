@@ -21,6 +21,8 @@
       "npm run test"
     ],
     "after:bump": [
+      "node scripts/update-version.js",
+      "git add src/environments/",
       "npm run build:prod"
     ],
     "after:release": [
