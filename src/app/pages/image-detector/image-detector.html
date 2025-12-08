@@ -34,6 +34,15 @@
         @if (!isCameraActive()) {
           <button
             type="button"
+            (click)="loadDemoImage()"
+            [disabled]="isLoading()"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
+            [ngClass]="{'bg-cyan-600 hover:bg-cyan-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
+            >
+            🖼️ Image Démo
+          </button>
+          <button
+            type="button"
             (click)="startCamera()"
             [disabled]="isLoading()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"

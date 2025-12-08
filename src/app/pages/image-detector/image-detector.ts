@@ -117,6 +117,22 @@ export class ImageDetectorComponent implements OnInit {
 
 
   /**
+   * Charge l'image de démonstration.
+   */
+  loadDemoImage() {
+    this.stopCamera(); // Arrêter la caméra si active
+    this.isLoading.set(true);
+    this.loadingMessage.set("Chargement de l'image de démo...");
+    this.clearCanvas();
+    this.clearCroppedDetections();
+    this.imageRotation.set(0);
+
+    // Charger l'image depuis public/demo.jpg
+    this.imageUrl.set('/demo.jpg');
+    this.imageSelected.set(true);
+  }
+
+  /**
    * Gère la sélection d'un fichier.
    */
   onFileSelected(event: Event) {
