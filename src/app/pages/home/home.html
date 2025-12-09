@@ -2,9 +2,10 @@
   <div class="max-w-2xl w-full">
 
     <!-- Titre principal -->
-    <h1 class="font-heading uppercase text-6xl md:text-8xl font-bold text-white text-center mb-12 tracking-wider drop-shadow-2xl">
+    <h1 class="font-heading uppercase text-6xl md:text-8xl font-bold text-white text-center mb-8 tracking-wider drop-shadow-2xl">
       FARAWAY
     </h1>
+    <p class="text-center text-white text-opacity-90 text-lg mb-12">{{ 'home.subtitle' | translate }}</p>
 
     <!-- Conteneur des boutons -->
     <div class="space-y-4">
@@ -15,7 +16,7 @@
           (click)="resumeGame()"
           class="w-full py-4 px-8 bg-yellow-600 hover:bg-yellow-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
           >
-          ▶️ Reprendre la partie en cours
+          ▶️ {{ 'home.resumeGame' | translate }}
         </button>
       }
 
@@ -24,7 +25,7 @@
         (click)="toggleNewGameForm()"
         class="w-full py-4 px-8 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
         >
-        {{ showNewGameForm() ? '✕ Annuler' : '🎮 Créer une nouvelle partie' }}
+        {{ showNewGameForm() ? ('✕ ' + ('common.cancel' | translate)) : ('🎮 ' + ('home.newGame' | translate)) }}
       </button>
 
       <!-- Formulaire dynamique des joueurs -->
@@ -32,7 +33,7 @@
         <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 shadow-2xl border border-white border-opacity-20">
           <form [formGroup]="gameForm" (ngSubmit)="startGame()" class="space-y-4">
 
-            <h2 class="font-heading uppercasefont-semibold text-white mb-4">Joueurs (2-6)</h2>
+            <h2 class="font-heading uppercasefont-semibold text-white mb-4">{{ 'home.players' | translate }}</h2>
 
             <div formArrayName="players" class="space-y-3">
               @for (control of playersArray.controls; track $index; let i = $index) {
@@ -40,7 +41,7 @@
                   <input
                     [formControl]="control"
                     type="text"
-                    [placeholder]="'Joueur ' + (i + 1)"
+                    [placeholder]="('home.playerPlaceholder' | translate) + ' ' + (i + 1)"
                     class="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                   @if (canRemovePlayer) {
@@ -63,7 +64,7 @@
                 (click)="addPlayer()"
                 class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-semibold transition duration-150"
                 >
-                + Ajouter un joueur
+                + {{ 'home.addPlayer' | translate }}
               </button>
             }
 
@@ -73,7 +74,7 @@
               [disabled]="!gameForm.valid"
               class="w-full py-4 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white text-xl font-bold rounded-lg shadow-lg transition duration-200"
               >
-              🚀 Démarrer la partie
+              🚀 {{ 'home.startGame' | translate }}
             </button>
           </form>
         </div>
@@ -84,7 +85,7 @@
         (click)="goToDetection()"
         class="w-full py-4 px-8 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl shadow-2xl transition duration-200 transform hover:scale-105"
         >
-        📷 Aller à la détection
+        📷 {{ 'home.goToDetection' | translate }}
       </button>
 
     </div>

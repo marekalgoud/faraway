@@ -1,16 +1,19 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-score',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './score.html',
   styleUrl: './score.scss',
 })
 export class ScoreComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  protected translationService = inject(TranslationService);
 
   players = signal<string[]>([]);
   rounds = signal<number>(1);

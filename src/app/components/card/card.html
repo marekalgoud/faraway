@@ -1,9 +1,9 @@
 <div class="flex flex-col bg-gray-100 p-3 rounded-xl shadow-xl border border-gray-200 w-full relative">
 
   <!-- Bouton de suppression en haut à droite -->
-  <button (click)="onDelete()" aria-label="Supprimer cette carte"
+  <button (click)="onDelete()" [attr.aria-label]="'card.delete' | translate"
     class="absolute top-2 right-2 z-50 w-6 h-6 flex items-center justify-center rounded-full bg-red-400 hover:bg-red-600 text-white shadow-md transition duration-150"
-    title="Supprimer cette carte">
+    [title]="'card.delete' | translate">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="18" y1="6" x2="6" y2="18"></line>
       <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -31,17 +31,17 @@
                 <rect x="3" y="3" width="18" height="14" rx="2"></rect>
                 <path d="M3 17l4-4 4 4 6-6 4 4"></path>
               </svg>
-              <div class="text-sm">Aperçu indisponible</div>
+              <div class="text-sm">{{ 'card.unavailable' | translate }}</div>
             </div>
           </div>
         }
       </div>
       <!-- Résumé des détections (max 5 éléments) -->
-      <h3 class="font-bold">carte detectée</h3>
+      <h3 class="font-bold">{{ 'card.detected' | translate }}</h3>
       <div [class]="`text-xs w-full p-2 rounded-lg shadow-inner ${cardBgClass()}`">
         <!-- Valeur -->
         <div class="flex items-center justify-between p-2">
-          <span class="font-semibold">Valeur:</span>
+          <span class="font-semibold">{{ 'card.value' | translate }}:</span>
           <span class="font-bold">
             {{ formatLabel(cardForm().get('value')?.value) }}
           </span>
@@ -49,20 +49,20 @@
         <!-- Multiplicateur -->
         @if (cardForm().get('multiplier')?.value) {
           <div class="flex items-center justify-between p-2">
-            <span class="font-semibold">Multiplicateur:</span>
+            <span class="font-semibold">{{ 'card.multiplier' | translate }}:</span>
             <span class="font-medium">
-              @let multiplicator = formatLabel(cardForm().get('multiplier')?.value);
-              <img class="h-5 w-auto object-contain" [src]="'/images/'+ formatLabelImage(multiplicator) + '.png'" [alt]="multiplicator" [title]="multiplicator">
+              @let multValue = cardForm().get('multiplier')?.value;
+              <img class="h-5 w-auto object-contain" [src]="'/images/'+ formatLabelImage(multValue) + '.png'" [alt]="formatLabel(multValue)" [title]="formatLabel(multValue)">
             </span>
           </div>
         }
         <!-- Options (Chimère, Gemme, Indice, Nuit, Chardon) -->
         <div class="flex items-center justify-between p-2">
-          <span class="font-semibold block mb-2">Options:</span>
+          <span class="font-semibold block mb-2">{{ 'card.options' | translate }}:</span>
           <div class="flex flex-wrap gap-1">
             @for (option of optionsArray.getRawValue(); track $index) {
               <span class="flex items-center">
-                <img width="20" [src]="'/images/'+ formatLabel(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
+                <img width="20" [src]="'/images/'+ formatLabelImage(option) + '.png'" [alt]="formatLabel(option)" [title]="formatLabel(option)">
               </span>
             }
           </div>
@@ -70,11 +70,11 @@
         <!-- Conditions -->
         @if (conditionsArray.length > 0) {
           <div class="flex items-center justify-between p-2">
-            <span class="font-semibold block mb-2">Conditions:</span>
+            <span class="font-semibold block mb-2">{{ 'card.conditions' | translate }}:</span>
             <div class="flex flex-wrap gap-1">
               @for (condition of conditionsArray.getRawValue(); track $index) {
                 <span class="flex items-center">
-                  <img width="16" [src]="'/images/'+ formatLabel(condition) + '.png'" [alt]="formatLabel(condition)" [title]="formatLabel(condition)">
+                  <img width="16" [src]="'/images/'+ formatLabelImage(condition) + '.png'" [alt]="formatLabel(condition)" [title]="formatLabel(condition)">
                 </span>
               }
             </div>
@@ -84,7 +84,7 @@
       <!-- Bouton pour basculer vers le formulaire -->
       <button (click)="toggleEdit()"
         class="w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 flex items-center justify-center space-x-2">
-        Modifier
+        {{ 'card.modify' | translate }}
       </button>
     </div>
   }
@@ -111,9 +111,9 @@
       <div class="w-full text-xs space-y-2">
 
         <div>
-          <label class="block font-medium text-gray-700">Couleur</label>
+          <label class="block font-medium text-gray-700">{{ 'card.color' | translate }}</label>
           <select formControlName="color" class="w-full p-1 border rounded">
-            <option value="">-- Aucune --</option>
+            <option value="">-- {{ 'card.none' | translate }} --</option>
             @for (color of colorOptions; track $index) {
               <option [value]="color">{{ formatLabel(color) }}</option>
             }
@@ -121,12 +121,12 @@
         </div>
 
         <div formArrayName="options" class="p-2 border rounded bg-white shadow-inner space-y-1">
-          <label class="block font-medium text-gray-700 mb-1">Options</label>
+          <label class="block font-medium text-gray-700 mb-1">{{ 'card.options' | translate }}</label>
 
           @for (control of optionsArray.controls; track $index; let i = $index) {
             <div class="flex items-center space-x-1">
               <select [formControl]="control" class="w-full p-1 border rounded text-xs">
-                <option value="">-- Sélectionner --</option>
+                <option value="">-- {{ 'card.select' | translate }} --</option>
                 @for (opt of optionsList; track $index) {
                   <option [value]="opt">{{ formatLabel(opt) }}</option>
                 }
@@ -139,17 +139,17 @@
 
           <button type="button" (click)="addOption()"
             class="mt-1 w-full py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition duration-100">
-            + Ajouter une Option
+            + {{ 'card.addOption' | translate }}
           </button>
         </div>
 
         <div formArrayName="conditions" class="p-2 border rounded bg-white shadow-inner space-y-1">
-          <label class="block font-medium text-gray-700 mb-1">Conditions</label>
+          <label class="block font-medium text-gray-700 mb-1">{{ 'card.conditions' | translate }}</label>
 
           @for (control of conditionsArray.controls; track $index; let i = $index) {
             <div class="flex items-center space-x-1">
               <select [formControl]="control" class="w-full p-1 border rounded text-xs">
-                <option value="">-- Sélectionner --</option>
+                <option value="">-- {{ 'card.select' | translate }} --</option>
                 @for (cond of conditionOptions; track $index) {
                   <option [value]="cond">{{ formatLabel(cond) }}</option>
                 }
@@ -162,14 +162,14 @@
 
           <button type="button" (click)="addCondition()"
             class="mt-1 w-full py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition duration-100">
-            + Ajouter une Condition
+            + {{ 'card.addCondition' | translate }}
           </button>
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700">Multiplicateur</label>
+          <label class="block font-medium text-gray-700">{{ 'card.multiplier' | translate }}</label>
           <select formControlName="multiplier" class="w-full p-1 border rounded">
-            <option value="">-- Aucun --</option>
+            <option value="">-- {{ 'card.noMultiplier' | translate }} --</option>
             @for (mult of multiplierOptions; track $index) {
               <option [value]="mult">{{ formatLabel(mult) }}</option>
             }
@@ -177,9 +177,9 @@
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700">Valeur</label>
+          <label class="block font-medium text-gray-700">{{ 'card.value' | translate }}</label>
           <select formControlName="value" class="w-full p-1 border rounded">
-            <option value="">-- Aucune --</option>
+            <option value="">-- {{ 'card.none' | translate }} --</option>
             @for (val of valueOptions; track $index) {
               <option [value]="val">{{ formatLabel(val) }}</option>
             }
@@ -188,7 +188,7 @@
       </div>
       <button (click)="toggleEdit()"
         class="w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 flex items-center justify-center space-x-2">
-        Valider
+        {{ 'card.validate' | translate }}
       </button>
     </div>
   }

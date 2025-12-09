@@ -4,17 +4,17 @@
       (click)="goToHome()"
       class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition duration-200"
       >
-      🏠 Accueil
+      🏠 {{ 'common.home' | translate }}
     </button>
     <button
       (click)="goToScore()"
       class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg transition duration-200"
       >
-      📊 Scores
+      📊 {{ 'common.score' | translate }}
     </button>
   </div>
 
-  <h1 class="font-heading uppercase text-3xl font-bold text-center text-white mb-6">Détecteur de Scène & Analyse de Cartes</h1>
+  <h1 class="font-heading uppercase text-3xl font-bold text-center text-white mb-6">{{ 'imageDetector.title' | translate }}</h1>
 
   <div class="max-w-6xl mx-auto bg-white bg-opacity-10 p-6 rounded-xl shadow-2xl border border-white border-opacity-20">
 
@@ -39,7 +39,7 @@
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
             [ngClass]="{'bg-cyan-600 hover:bg-cyan-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
             >
-            🖼️ Image Démo
+            🖼️ {{ 'imageDetector.demoImage' | translate }}
           </button>
           <button
             type="button"
@@ -48,7 +48,7 @@
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
             [ngClass]="{'bg-purple-600 hover:bg-purple-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
             >
-            📷 Ouvrir Caméra
+            📷 {{ 'imageDetector.openCamera' | translate }}
           </button>
         }
 
@@ -58,14 +58,14 @@
             (click)="capturePhoto()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150"
             >
-            📸 Capturer Photo
+            📸 {{ 'imageDetector.capturePhoto' | translate }}
           </button>
           <button
             type="button"
             (click)="stopCamera()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition duration-150"
             >
-            ✕ Fermer Caméra
+            ✕ {{ 'imageDetector.closeCamera' | translate }}
           </button>
         }
       </div>
@@ -79,7 +79,7 @@
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
             [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
             >
-            Détecter Objets
+            {{ 'imageDetector.detectObjects' | translate }}
           </button>
           <button
             type="button"
@@ -89,7 +89,7 @@
             [ngClass]="{'bg-amber-600 hover:bg-amber-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
             title="Rotate image 90° clockwise"
             >
-            ↻ Rotation
+            ↻ {{ 'imageDetector.rotation' | translate }}
           </button>
         </div>
       }
@@ -166,7 +166,7 @@
         <form [formGroup]="detectorForm">
           @if (cardsFormArray.controls.length > 0) {
             <div class="mt-4">
-              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">Cartes</h2>
+              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">{{ 'imageDetector.cards' | translate }}</h2>
               <div formArrayName="cards">
                 <swiper-container
                 navigation="false"
@@ -199,7 +199,7 @@
 
           @if (templesFormArray.controls.length > 0) {
             <div class="mt-4">
-              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">Temples</h2>
+              <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 mb-4">{{ 'imageDetector.temples' | translate }}</h2>
               <div formArrayName="temples">
                 <swiper-container
                 navigation="false"
@@ -239,21 +239,21 @@
               (click)="calculateScore()"
               class="w-full px-8 py-3 rounded-lg text-white font-bold text-lg transition duration-150 bg-green-600 hover:bg-green-700"
               >
-              Calculer le Score
+              {{ 'imageDetector.calculateScore' | translate }}
             </button>
             <!-- Zone d'affichage des résultats -->
             @if (scoreRounds().length > 0) {
               <div class="mt-6 bg-gray-800 rounded-lg shadow-inner overflow-hidden">
-                <h3 class="font-heading uppercase text-lg font-semibold text-green-300 p-4 pb-3">Détail du Calcul</h3>
+                <h3 class="font-heading uppercase text-lg font-semibold text-green-300 p-4 pb-3">{{ 'imageDetector.calculationDetails' | translate }}</h3>
                 
                 <!-- Tableau -->
                 <div class="overflow-x-auto">
                   <table class="w-full text-sm">
                     <thead class="bg-gray-700 text-gray-100">
                       <tr>
-                        <th class="px-4 py-3 text-left font-semibold">Round</th>
-                        <th class="px-4 py-3 text-center font-semibold">Score</th>
-                        <th class="px-4 py-3 text-left font-semibold">Détail du calcul</th>
+                        <th class="px-4 py-3 text-left font-semibold">{{ 'imageDetector.round' | translate }}</th>
+                        <th class="px-4 py-3 text-center font-semibold">{{ 'common.score' | translate }}</th>
+                        <th class="px-4 py-3 text-left font-semibold">{{ 'imageDetector.detail' | translate }}</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
@@ -271,7 +271,7 @@
                 <!-- Score total -->
                 <div class="bg-gray-900 p-4 border-t-2 border-green-500">
                   <h2 class="font-heading uppercase text-2xl font-bold text-white text-center">
-                    Score Total: <span class="text-green-400">{{ totalScore() }}</span>
+                    {{ 'imageDetector.totalScore' | translate }}: <span class="text-green-400">{{ totalScore() }}</span>
                   </h2>
                 </div>
               </div>

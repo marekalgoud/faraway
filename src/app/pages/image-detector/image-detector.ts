@@ -8,6 +8,8 @@ import { TensorflowService, DetectionResult } from '../../services/tensorFlow.se
 import { CommonModule } from '@angular/common';
 // NOUVEAU: Import du service de calcul
 import { ScoreCalculatorService } from '../../services/scoreCalculator.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 // NOUVEAU: Import des constantes
 import {
@@ -33,7 +35,7 @@ interface CroppedFormItem {
   selector: 'app-image-detector',
   // ... (imports, changeDetection, templateUrl, styles inchangés)
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Card, Temple],
+  imports: [CommonModule, ReactiveFormsModule, Card, Temple, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './image-detector.html',
   styleUrl: './image-detector.scss',
@@ -49,6 +51,7 @@ export class ImageDetectorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private scoreService = inject(ScoreCalculatorService);
   private router = inject(Router);
+  protected translationService = inject(TranslationService);
 
   // --- Signals ---
   isLoading = signal(true);

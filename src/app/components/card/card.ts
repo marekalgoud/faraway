@@ -1,10 +1,12 @@
-import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy, output } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy, output, inject } from '@angular/core';
 
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormBuilder, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { CARD_COLOR_CLASSES, CARD_CONDITION_CLASSES, CARD_MULTIPLIER_CLASSES, CARD_VALUE_CLASSES } from '../../constants';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 // Interface pour stocker les résultats de l'analyse simplifiée
 interface ElementDetection {
@@ -15,11 +17,12 @@ interface ElementDetection {
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './card.html',
   styles: []
 })
 export class Card implements OnInit, OnDestroy {
+  protected translationService = inject(TranslationService);
 
   cardForm = input.required<FormGroup>();
   cardUrl = input.required<string|null>();
@@ -128,11 +131,13 @@ export class Card implements OnInit, OnDestroy {
       this.deleteCard.emit(idx);
     }
   }
-
+  /**
+   * Formate le label pour l'affichage (avec traduction)
+   */
   formatLabel(label: string | null): string {
     if (!label) return '—';
 
-    return label
+    const formatted = label
       .replace(/^card_/, '')
       .replace(/^value_/, '')
       .replace(/^each_/, '')
@@ -140,10 +145,24 @@ export class Card implements OnInit, OnDestroy {
       .replace(/_/g, ' ')
       .split(' ')
       .join(' ');
+    
+    // Traduire la valeur formatée
+    return this.translationService.translateFormatted(formatted, 'card');
   }
 
+  /**
+   * Formate le label pour les noms d'images (sans traduction)
+   */
   formatLabelImage(label: string | null): string {
-    return label ? label.replace(/ /g, '_') : '';
+    if (!label) return '';
+    
+    // Formater sans traduire - garder le nom original pour les images
+    return label
+      .replace(/^card_/, '')
+      .replace(/^value_/, '')
+      .replace(/^each_/, '')
+      .replace(/^condition_/, '')
+      .replace(/_/g, '_'); // Garder les underscores pour les noms de fichiers
   }
 
 }

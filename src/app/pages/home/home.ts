@@ -1,16 +1,19 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-home',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
 export class Home implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  protected translationService = inject(TranslationService);
 
   showNewGameForm = signal(false);
   hasCurrentGame = signal(false);

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { TranslationService } from './translation.service';
 
 // Interface pour un round de calcul
 export interface ScoreRound {
@@ -24,6 +25,7 @@ interface CountableItem {
   providedIn: 'root'
 })
 export class ScoreCalculatorService {
+  private translationService = inject(TranslationService);
 
   constructor() { }
 
@@ -55,7 +57,7 @@ export class ScoreCalculatorService {
 
       if (!conditionsMet) {
         cardValue = 0;
-        cardDetails.push(`Conditions non remplies`);
+        cardDetails.push(this.translationService.translate('score.calculation.conditionsNotMet'));
       }
 
       // 1b. Appliquer le multiplicateur
@@ -65,7 +67,7 @@ export class ScoreCalculatorService {
         cardDetails.push(`${cardValue} x ${count} = ${cardScore}pts`);
       } else {
         cardScore = cardValue;
-        cardDetails.push(`Score de base: ${cardScore}pts`);
+        cardDetails.push(`${this.translationService.translate('score.calculation.baseScore')}: ${cardScore}pts`);
       }
 
       score += cardScore;
@@ -79,7 +81,7 @@ export class ScoreCalculatorService {
       });
 
       // Garder aussi l'ancien format pour compatibilité
-      details.push(`[Carte ${i + 1}]`);
+      details.push(`[${this.translationService.translate('score.calculation.card')} ${i + 1}]`);
       cardDetails.forEach(d => details.push(` -> ${d}`));
     }
 
@@ -108,21 +110,21 @@ export class ScoreCalculatorService {
       templesDetails.push(templeInfo.join(''));
 
       // Ancien format
-      details.push(`[Temple ${i + 1}]`);
-      details.push(` -> Score: ${templeScore}pts`);
+      details.push(`[${this.translationService.translate('score.calculation.temple')} ${i + 1}]`);
+      details.push(` -> ${this.translationService.translate('common.score')}: ${templeScore}pts`);
     }
 
     score += templesScore;
 
     // Ajouter le round des temples
     rounds.push({
-      round: 'Temples',
+      round: this.translationService.translate('score.calculation.temples'),
       score: templesScore,
       details: templesDetails.join(' | ')
     });
 
     details.push("---------------------------------");
-    details.push(`SCORE TOTAL: ${score}`);
+    details.push(`${this.translationService.translate('score.calculation.total')}: ${score}`);
 
     return { score, rounds, details };
   }
@@ -173,7 +175,10 @@ export class ScoreCalculatorService {
       const required = requiredCounts[targetName];
       const available = visibleCounts[targetName] || 0;
 
-      details.push(` -> Condition: ${targetName} (Requis: ${required}, Disponible: ${available})`);
+      const conditionLabel = this.translationService.translate('score.calculation.condition');
+      const requiredLabel = this.translationService.translate('score.calculation.required');
+      const availableLabel = this.translationService.translate('score.calculation.available');
+      details.push(` -> ${conditionLabel}: ${targetName} (${requiredLabel}: ${required}, ${availableLabel}: ${available})`);
 
       if (available < required) {
         return false;

@@ -3,6 +3,8 @@ import { Subscription } from 'rxjs';
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 // Classes du modèle d'analyse de temples (basé sur metadata.yaml)
 const COLOR_CLASSES = ['card_blue', 'card_gray', 'card_green', 'card_red', 'card_yellow'];
@@ -22,11 +24,13 @@ const MULTIPLIER_CLASSES = [
 @Component({
   selector: 'app-temple',
   standalone: true,
-  imports: [ReactiveFormsModule], // Ajout de CommonModule + ReactiveFormsModule
+  imports: [ReactiveFormsModule, TranslatePipe], // Ajout de CommonModule + ReactiveFormsModule
   templateUrl: './temple.html',
   styles: []
 })
 export class Temple implements OnInit, OnDestroy {
+  protected translationService = inject(TranslationService);
+  
   // Le FormGroup est maintenant passé en @Input
   @Input({ required: true }) templeForm!: FormGroup;
   @Input({ required: true }) templeUrl!: string;
@@ -87,10 +91,13 @@ export class Temple implements OnInit, OnDestroy {
     if (this._subs) this._subs.unsubscribe();
   }
 
+  /**
+   * Formate le label pour l'affichage (avec traduction)
+   */
   formatLabel(label: string | null): string {
     if (!label) return '—';
 
-    return label
+    const formatted = label
       .replace(/^card_/, '')
       .replace(/^value_/, '')
       .replace(/^each_/, '')
@@ -98,10 +105,24 @@ export class Temple implements OnInit, OnDestroy {
       .replace(/_/g, ' ')
       .split(' ')
       .join(' ');
+    
+    // Traduire la valeur formatée
+    return this.translationService.translateFormatted(formatted, 'temple');
   }
 
+  /**
+   * Formate le label pour les noms d'images (sans traduction)
+   */
   formatLabelImage(label: string | null): string {
-    return label ? label.replace(/ /g, '_') : '';
+    if (!label) return '';
+    
+    // Formater sans traduire - garder le nom original pour les images
+    return label
+      .replace(/^card_/, '')
+      .replace(/^value_/, '')
+      .replace(/^each_/, '')
+      .replace(/^condition_/, '')
+      .replace(/_/g, '_'); // Garder les underscores pour les noms de fichiers
   }
 
   toggleEdit() {
