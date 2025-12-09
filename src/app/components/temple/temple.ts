@@ -1,23 +1,11 @@
-import { Component, Input, inject, signal, computed, OnInit, OnDestroy, output } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, output, input } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
-
-// Classes du modèle d'analyse de temples (basé sur metadata.yaml)
-const COLOR_CLASSES = ['card_blue', 'card_gray', 'card_green', 'card_red', 'card_yellow'];
-const VALUE_CLASSES = [
-  'value_1', 'value_2', 'value_4', 'value_5'
-].sort(); // Trier pour l'affichage
-const MULTIPLIER_CLASSES = [
-  'each_all_colors', 'each_blue', 'each_blue_or_yellow', 'each_chimera', 'each_gem',
-  'each_green', 'each_green_or_blue', 'each_green_or_red', 'each_hint', 'each_night',
-  'each_red', 'each_red_or_blue', 'each_red_or_yellow', 'each_thistle', 'each_yellow',
-  'each_yellow_or_green'
-].sort(); // Trier pour l'affichage
-// Les 'Options' sont gérées par un array maintenant
+import { TEMPLE_COLOR_CLASSES, TEMPLE_VALUE_CLASSES, TEMPLE_MULTIPLIER_CLASSES } from '../../constants';
 
 
 
@@ -31,10 +19,10 @@ const MULTIPLIER_CLASSES = [
 export class Temple implements OnInit, OnDestroy {
   protected translationService = inject(TranslationService);
   
-  // Le FormGroup est maintenant passé en @Input
-  @Input({ required: true }) templeForm!: FormGroup;
-  @Input({ required: true }) templeUrl!: string;
-  @Input() templeIndex?: number;
+  // Le FormGroup est maintenant passé en input signal
+  templeForm = input.required<FormGroup>();
+  templeUrl = input.required<string>();
+  templeIndex = input<number>();
 
   // Output pour signaler la suppression au parent
   deleteTemple = output<number>();
@@ -60,14 +48,14 @@ export class Temple implements OnInit, OnDestroy {
   });
 
   // Listes des options pour les <select> du template
-  colorOptions = COLOR_CLASSES;
-  valueOptions = VALUE_CLASSES;
-  multiplierOptions = MULTIPLIER_CLASSES;
+  colorOptions = TEMPLE_COLOR_CLASSES;
+  valueOptions = TEMPLE_VALUE_CLASSES.toSorted();
+  multiplierOptions = TEMPLE_MULTIPLIER_CLASSES.toSorted();
   optionsList = ['chimera', 'gem', 'hint', 'night', 'thistle'];
 
   // Helpers pour accéder facilement aux parties du formulaire dans le template
   get optionsArray(): FormArray<FormControl<string|null>> {
-    return this.templeForm.get('options') as FormArray<FormControl<string|null>>;
+    return this.templeForm().get('options') as FormArray<FormControl<string|null>>;
   }
 
   addOption() {
@@ -79,8 +67,9 @@ export class Temple implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (!this.templeForm) return;
-    const ctrl = this.templeForm.get('color') as FormControl | null;
+    const form = this.templeForm();
+    if (!form) return;
+    const ctrl = form.get('color') as FormControl | null;
     if (ctrl) {
       this.selectedColor.set((ctrl.value as string) || '');
       this._subs = ctrl.valueChanges?.subscribe((v: any) => this.selectedColor.set(v || '')) ?? null;
@@ -128,13 +117,14 @@ export class Temple implements OnInit, OnDestroy {
   toggleEdit() {
     this.isEditing.update(v => !v);
   }
-
   /**
    * Émet un signal au parent pour supprimer ce temple.
    */
   onDelete() {
-    if (this.templeIndex !== undefined) {
-      this.deleteTemple.emit(this.templeIndex);
+    const index = this.templeIndex();
+    if (index !== undefined) {
+      this.deleteTemple.emit(index);
     }
   }
 }
+

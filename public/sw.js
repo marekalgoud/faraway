@@ -1,6 +1,7 @@
-const CACHE_NAME = 'faraway-v1';
-const STATIC_CACHE = 'faraway-static-v1';
-const DYNAMIC_CACHE = 'faraway-dynamic-v1';
+const CACHE_NAME = 'faraway-v2';
+const STATIC_CACHE = 'faraway-static-v2';
+const DYNAMIC_CACHE = 'faraway-dynamic-v2';
+const MODELS_CACHE = 'faraway-models-v2';
 
 // Assets à mettre en cache au premier chargement
 const STATIC_ASSETS = [
@@ -13,19 +14,58 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png'
 ];
 
+// Modèles TensorFlow à mettre en cache (critiques pour l'application)
+const MODEL_ASSETS = [
+  // Modèle CARD
+  '/model/card/model.json',
+  '/model/card/group1-shard1of10.bin',
+  '/model/card/group1-shard2of10.bin',
+  '/model/card/group1-shard3of10.bin',
+  '/model/card/group1-shard4of10.bin',
+  '/model/card/group1-shard5of10.bin',
+  '/model/card/group1-shard6of10.bin',
+  '/model/card/group1-shard7of10.bin',
+  '/model/card/group1-shard8of10.bin',
+  '/model/card/group1-shard9of10.bin',
+  '/model/card/group1-shard10of10.bin',
+  // Modèle SET
+  '/model/set/model.json',
+  '/model/set/group1-shard1of3.bin',
+  '/model/set/group1-shard2of3.bin',
+  '/model/set/group1-shard3of3.bin',
+  // Modèle TEMPLE
+  '/model/temple/model.json',
+  '/model/temple/group1-shard1of3.bin',
+  '/model/temple/group1-shard2of3.bin',
+  '/model/temple/group1-shard3of3.bin'
+];
+
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
   console.log('[SW] Installation en cours...');
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('[SW] Mise en cache des assets statiques');
-        return cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' })));
-      })
-      .catch((err) => {
-        console.error('[SW] Erreur lors de la mise en cache:', err);
-      })
+    Promise.all([
+      // Cache des assets statiques
+      caches.open(STATIC_CACHE)
+        .then((cache) => {
+          console.log('[SW] Mise en cache des assets statiques');
+          return cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' })));
+        })
+        .catch((err) => {
+          console.error('[SW] Erreur lors de la mise en cache des assets statiques:', err);
+        }),
+      // Cache des modèles TensorFlow
+      caches.open(MODELS_CACHE)
+        .then((cache) => {
+          console.log('[SW] Mise en cache des modèles TensorFlow (peut prendre du temps...)');
+          return cache.addAll(MODEL_ASSETS.map(url => new Request(url, { cache: 'reload' })));
+        })
+        .catch((err) => {
+          console.error('[SW] Erreur lors de la mise en cache des modèles:', err);
+        })
+    ])
   );
+  // Force le service worker à devenir actif immédiatement
   self.skipWaiting();
 });
 
@@ -37,7 +77,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames
           .filter((cacheName) => {
-            return cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE;
+            return cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== MODELS_CACHE;
           })
           .map((cacheName) => {
             console.log('[SW] Suppression du cache obsolète:', cacheName);
@@ -59,6 +99,30 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorer les requêtes vers des domaines externes (sauf Google Fonts)
   if (url.origin !== location.origin && !url.origin.includes('fonts.googleapis.com') && !url.origin.includes('fonts.gstatic.com')) {
+    return;
+  }
+
+  // Stratégie Cache First pour les modèles TensorFlow (critiques pour l'app)
+  if (url.pathname.startsWith('/model/')) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          console.log('[SW] Modèle servi depuis le cache:', url.pathname);
+          return response;
+        }
+        console.log('[SW] Modèle récupéré depuis le réseau:', url.pathname);
+        return fetch(request).then((response) => {
+          // Mettre en cache le modèle pour la prochaine fois
+          if (response && response.status === 200) {
+            return caches.open(MODELS_CACHE).then((cache) => {
+              cache.put(request, response.clone());
+              return response;
+            });
+          }
+          return response;
+        });
+      })
+    );
     return;
   }
 

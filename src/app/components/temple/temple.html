@@ -1,4 +1,4 @@
-<div [formGroup]="templeForm" class="flex flex-col bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200 space-y-2 relative">
+<div [formGroup]="templeForm()" class="flex flex-col bg-gray-50 p-3 rounded-lg shadow-md border border-gray-200 space-y-2 relative">
 
   <!-- Bouton de suppression en haut à droite -->
   <button (click)="onDelete()"
@@ -11,9 +11,10 @@
   </button>
 
   <!-- Contenu du temple -->
-  @if (templeUrl) {
+   @let templeUrlSignal = templeUrl();
+  @if (templeUrlSignal) {
     <div class="flex justify-center">
-    <img [src]="templeUrl"
+    <img [src]="templeUrlSignal"
       alt="Temple découpée"
       class="max-h-full w-auto shadow-lg border-1 border-gray-200 rounded-lg object-contain block mx-auto"
       >
@@ -36,13 +37,13 @@
       <div [class]="`text-xs w-full p-2 rounded-lg shadow-inner ${templeBgClass()}`">
         <div class="flex items-center justify-between p-2">
           <span class="font-semibold">{{ 'temple.value' | translate }}:</span>
-          <span class="font-bold">{{ formatLabel(templeForm.get('value')?.value) }}</span>
+          <span class="font-bold">{{ formatLabel(templeForm().get('value')?.value) }}</span>
         </div>
-        @if (templeForm.get('multiplier')?.value) {
+        @if (templeForm().get('multiplier')?.value) {
           <div class="flex items-center justify-between p-2">
             <span class="font-semibold">{{ 'temple.multiplier' | translate }}:</span>
             <span class="font-medium">
-              @let multValue = templeForm.get('multiplier')?.value;
+              @let multValue = templeForm().get('multiplier')?.value;
               <img class="h-5 w-auto object-contain" [src]="'/images/'+ formatLabelImage(multValue) + '.png'" [alt]="formatLabel(multValue)" [title]="formatLabel(multValue)">
             </span>
           </div>

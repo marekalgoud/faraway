@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, ElementRef, input, computed, OnInit, OnDestroy, output, inject } from '@angular/core';
+import { Component, signal, ElementRef, input, computed, OnInit, OnDestroy, output, inject, viewChild } from '@angular/core';
 
 
 // NOUVEAUX Imports pour Reactive Forms
@@ -32,7 +32,7 @@ export class Card implements OnInit, OnDestroy {
   deleteCard = output<number>();
 
   // Références aux éléments du DOM pour le dessin des boîtes
-  @ViewChild('cardImage') cardImage!: ElementRef<HTMLImageElement>;
+  cardImage = viewChild<ElementRef<HTMLImageElement>>('cardImage');
 
   // --- NOUVEAUX ÉTATS POUR L'AFFICHAGE ---
   // Affiche/Masque le formulaire de modification
