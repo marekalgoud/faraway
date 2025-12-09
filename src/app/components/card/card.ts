@@ -1,12 +1,11 @@
-import { Component, signal, ElementRef, input, computed, OnInit, OnDestroy, output, inject, viewChild } from '@angular/core';
-
+import { Component, signal, ElementRef, input, computed, output, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 // NOUVEAUX Imports pour Reactive Forms
-import { ReactiveFormsModule, FormGroup, FormArray, FormBuilder, FormControl } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { CARD_COLOR_CLASSES, CARD_CONDITION_CLASSES, CARD_MULTIPLIER_CLASSES, CARD_VALUE_CLASSES } from '../../constants';
+import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { CARD_COLOR_CLASSES, CARD_CONDITION_CLASSES, CARD_MULTIPLIER_CLASSES, CARD_VALUE_CLASSES, CARD_OPTION_CLASSES, type CardOption } from '../../constants';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { TranslationService } from '../../services/translation.service';
+import { FormatterService } from '../../services/formatter.service';
 
 // Interface pour stocker les résultats de l'analyse simplifiée
 interface ElementDetection {
@@ -19,10 +18,11 @@ interface ElementDetection {
   standalone: true,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './card.html',
-  styles: []
+  styles: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Card implements OnInit, OnDestroy {
-  protected translationService = inject(TranslationService);
+export class Card {
+  private formatterService = inject(FormatterService);
 
   cardForm = input.required<FormGroup>();
   cardUrl = input.required<string|null>();
@@ -45,15 +45,15 @@ export class Card implements OnInit, OnDestroy {
   analyzedElements = signal<ElementDetection[]>([]);
 
   // Listes des options pour les <select> du template
-  colorOptions = CARD_COLOR_CLASSES.sort();
-  valueOptions = CARD_VALUE_CLASSES.sort((a, b) => {
+  colorOptions = CARD_COLOR_CLASSES.toSorted();
+  valueOptions = CARD_VALUE_CLASSES.toSorted((a, b) => {
     const na = parseInt((a || '').replace(/\D/g, ''), 10) || 0;
     const nb = parseInt((b || '').replace(/\D/g, ''), 10) || 0;
     return na - nb;
   });
-  conditionOptions = CARD_CONDITION_CLASSES.sort();
-  multiplierOptions = CARD_MULTIPLIER_CLASSES.sort();
-  optionsList = ['chimera', 'gem', 'hint', 'night', 'thistle'];
+  conditionOptions = CARD_CONDITION_CLASSES.toSorted();
+  multiplierOptions = CARD_MULTIPLIER_CLASSES.toSorted();
+  optionsList: readonly CardOption[] = CARD_OPTION_CLASSES;
 
   private colorBgMap: Record<string, string> = {
     'red': 'bg-red-100',
@@ -65,29 +65,18 @@ export class Card implements OnInit, OnDestroy {
   cardBgClass = computed(() => {
     const color = this.selectedColor();
     if (!color) return 'bg-gray-200';
-    const normalizedColor = this.formatLabel(color).toLowerCase();
+    const normalizedColor = this.formatterService.formatLabel(color, 'card').toLowerCase();
     return this.colorBgMap[normalizedColor] || 'bg-gray-200';
   });
 
-  // Signal to reflect current color control value and subscription for cleanup
-  private selectedColor = signal<string>('');
-  private _subs: Subscription | null = null;
-
-  ngOnInit(): void {
-    // If the input FormGroup already has a color control, initialize and subscribe
+  // Signal to reflect current color control value
+  private selectedColor = computed(() => {
     const fg = this.cardForm();
-    if (!fg) return;
+    if (!fg) return '';
     const ctrl = fg.get('color') as FormControl | null;
-    if (ctrl) {
-      const initial = ctrl.value as string | null;
-      this.selectedColor.set(initial || '');
-      this._subs = ctrl.valueChanges?.subscribe((v: any) => this.selectedColor.set(v || '')) ?? null;
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this._subs) this._subs.unsubscribe();
-  }
+    if (!ctrl) return '';
+    return toSignal(ctrl.valueChanges, { initialValue: ctrl.value || '' })() || '';
+  });
 
   // Helpers pour accéder facilement aux parties du formulaire
   get optionsArray(): FormArray<FormControl<string|null>> {
@@ -135,34 +124,14 @@ export class Card implements OnInit, OnDestroy {
    * Formate le label pour l'affichage (avec traduction)
    */
   formatLabel(label: string | null): string {
-    if (!label) return '—';
-
-    const formatted = label
-      .replace(/^card_/, '')
-      .replace(/^value_/, '')
-      .replace(/^each_/, '')
-      .replace(/^condition_/, '')
-      .replace(/_/g, ' ')
-      .split(' ')
-      .join(' ');
-    
-    // Traduire la valeur formatée
-    return this.translationService.translateFormatted(formatted, 'card');
+    return this.formatterService.formatLabel(label, 'card');
   }
 
   /**
    * Formate le label pour les noms d'images (sans traduction)
    */
   formatLabelImage(label: string | null): string {
-    if (!label) return '';
-    
-    // Formater sans traduire - garder le nom original pour les images
-    return label
-      .replace(/^card_/, '')
-      .replace(/^value_/, '')
-      .replace(/^each_/, '')
-      .replace(/^condition_/, '')
-      .replace(/_/g, '_'); // Garder les underscores pour les noms de fichiers
+    return this.formatterService.formatLabelImage(label);
   }
 
 }

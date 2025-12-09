@@ -22,7 +22,7 @@
     ],
     "after:bump": [
       "node scripts/update-version.js",
-      "git add src/environments/",
+      "git add src/environments/ public/sw.js",
       "npm run build:prod"
     ],
     "after:release": [

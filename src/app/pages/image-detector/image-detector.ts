@@ -23,7 +23,16 @@ import {
   TEMPLE_COLOR_CLASSES,
   TEMPLE_VALUE_CLASSES,
   TEMPLE_MULTIPLIER_CLASSES,
-  TEMPLE_ELEMENT_CLASSES_MAPPING
+  TEMPLE_ELEMENT_CLASSES_MAPPING,
+  isCardColor,
+  isCardValue,
+  isCardCondition,
+  isCardOption,
+  isCardMultiplier,
+  isTempleColor,
+  isTempleValue,
+  isTempleMultiplier,
+  isTempleOption
 } from '../../constants';
 
 interface CroppedFormItem {
@@ -573,15 +582,15 @@ export class ImageDetectorComponent implements OnInit {
 
         this.loadingMessage.set(`carte - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
 
-        if (CARD_COLOR_CLASSES.includes(className) && score > bestColorScore) {
+        if (isCardColor(className) && score > bestColorScore) {
           bestColor = className; bestColorScore = score;
-        } else if (CARD_VALUE_CLASSES.includes(className) && score > bestValueScore) {
+        } else if (isCardValue(className) && score > bestValueScore) {
           bestValue = className; bestValueScore = score;
-        } else if (CARD_MULTIPLIER_CLASSES.includes(className) && score > bestMultiplierScore) {
+        } else if (isCardMultiplier(className) && score > bestMultiplierScore) {
           bestMultiplier = className; bestMultiplierScore = score;
-        } else if (CARD_CONDITION_CLASSES.includes(className)) {
+        } else if (isCardCondition(className)) {
           foundConditions.push(className);
-        } else if (CARD_OPTION_CLASSES.includes(className)) {
+        } else if (isCardOption(className)) {
           foundOptions.push(className);
         }
       }
@@ -613,16 +622,16 @@ export class ImageDetectorComponent implements OnInit {
 
         this.loadingMessage.set(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
         console.log(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
-        if (TEMPLE_COLOR_CLASSES.includes(className) && score > bestColorScore) {
+        if (isTempleColor(className) && score > bestColorScore) {
           bestColor = className;
           bestColorScore = score;
-        } else if (TEMPLE_VALUE_CLASSES.includes(className) && score > bestValueScore) {
+        } else if (isTempleValue(className) && score > bestValueScore) {
           bestValue = className;
           bestValueScore = score;
-        } else if (TEMPLE_MULTIPLIER_CLASSES.includes(className) && score > bestMultiplierScore) {
+        } else if (isTempleMultiplier(className) && score > bestMultiplierScore) {
           bestMultiplier = className;
           bestMultiplierScore = score;
-        } else if (CARD_OPTION_CLASSES.includes(className)) {
+        } else if (isTempleOption(className)) {
           foundOptions.push(className);
         }
       }

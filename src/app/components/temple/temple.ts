@@ -1,23 +1,24 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy, output, input } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, inject, signal, computed, output, input, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { TranslationService } from '../../services/translation.service';
-import { TEMPLE_COLOR_CLASSES, TEMPLE_VALUE_CLASSES, TEMPLE_MULTIPLIER_CLASSES } from '../../constants';
+import { TEMPLE_COLOR_CLASSES, TEMPLE_VALUE_CLASSES, TEMPLE_MULTIPLIER_CLASSES, TEMPLE_OPTION_CLASSES, type TempleOption } from '../../constants';
+import { FormatterService } from '../../services/formatter.service';
 
 
 
 @Component({
   selector: 'app-temple',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe], // Ajout de CommonModule + ReactiveFormsModule
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './temple.html',
-  styles: []
+  styles: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Temple implements OnInit, OnDestroy {
-  protected translationService = inject(TranslationService);
+export class Temple {
+  private formatterService = inject(FormatterService);
   
   // Le FormGroup est maintenant passé en input signal
   templeForm = input.required<FormGroup>();
@@ -36,14 +37,19 @@ export class Temple implements OnInit, OnDestroy {
     'green': 'bg-green-100',
     'yellow': 'bg-yellow-100',
   };
-  // reactive color signal + computed class
-  private selectedColor = signal<string>('');
-  private _subs: Subscription | null = null;
+  // reactive color signal
+  private selectedColor = computed(() => {
+    const form = this.templeForm();
+    if (!form) return '';
+    const ctrl = form.get('color') as FormControl | null;
+    if (!ctrl) return '';
+    return toSignal(ctrl.valueChanges, { initialValue: ctrl.value || '' })() || '';
+  });
 
   templeBgClass = computed(() => {
     const color = this.selectedColor();
     if (!color) return 'bg-gray-200';
-    const normalizedColor = this.formatLabel(color).toLowerCase();
+    const normalizedColor = this.formatterService.formatLabel(color, 'temple').toLowerCase();
     return this.colorBgMap[normalizedColor] || 'bg-gray-200';
   });
 
@@ -51,7 +57,7 @@ export class Temple implements OnInit, OnDestroy {
   colorOptions = TEMPLE_COLOR_CLASSES;
   valueOptions = TEMPLE_VALUE_CLASSES.toSorted();
   multiplierOptions = TEMPLE_MULTIPLIER_CLASSES.toSorted();
-  optionsList = ['chimera', 'gem', 'hint', 'night', 'thistle'];
+  optionsList: readonly TempleOption[] = TEMPLE_OPTION_CLASSES;
 
   // Helpers pour accéder facilement aux parties du formulaire dans le template
   get optionsArray(): FormArray<FormControl<string|null>> {
@@ -66,52 +72,18 @@ export class Temple implements OnInit, OnDestroy {
     this.optionsArray.removeAt(index);
   }
 
-  ngOnInit(): void {
-    const form = this.templeForm();
-    if (!form) return;
-    const ctrl = form.get('color') as FormControl | null;
-    if (ctrl) {
-      this.selectedColor.set((ctrl.value as string) || '');
-      this._subs = ctrl.valueChanges?.subscribe((v: any) => this.selectedColor.set(v || '')) ?? null;
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this._subs) this._subs.unsubscribe();
-  }
-
   /**
    * Formate le label pour l'affichage (avec traduction)
    */
   formatLabel(label: string | null): string {
-    if (!label) return '—';
-
-    const formatted = label
-      .replace(/^card_/, '')
-      .replace(/^value_/, '')
-      .replace(/^each_/, '')
-      .replace(/^condition_/, '')
-      .replace(/_/g, ' ')
-      .split(' ')
-      .join(' ');
-    
-    // Traduire la valeur formatée
-    return this.translationService.translateFormatted(formatted, 'temple');
+    return this.formatterService.formatLabel(label, 'temple');
   }
 
   /**
    * Formate le label pour les noms d'images (sans traduction)
    */
   formatLabelImage(label: string | null): string {
-    if (!label) return '';
-    
-    // Formater sans traduire - garder le nom original pour les images
-    return label
-      .replace(/^card_/, '')
-      .replace(/^value_/, '')
-      .replace(/^each_/, '')
-      .replace(/^condition_/, '')
-      .replace(/_/g, '_'); // Garder les underscores pour les noms de fichiers
+    return this.formatterService.formatLabelImage(label);
   }
 
   toggleEdit() {

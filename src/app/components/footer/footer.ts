@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { TranslationService, Language } from '../../services/translation.service';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-footer',
   imports: [CommonModule],
   templateUrl: './footer.html',
-  styleUrl: './footer.scss'
+  styleUrl: './footer.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Footer {
   private translationService = inject(TranslationService);

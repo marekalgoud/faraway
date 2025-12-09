@@ -32,4 +32,28 @@ export const environment = {
 
 fs.writeFileSync(envProdPath, envProdContent, 'utf8');
 
-console.log(`✅ Version mise à jour vers ${version}`);
+// Mettre à jour sw.js avec la nouvelle version
+const swPath = path.join(__dirname, '../public/sw.js');
+let swContent = fs.readFileSync(swPath, 'utf8');
+
+// Remplacer les noms de cache avec la nouvelle version
+swContent = swContent.replace(
+  /const CACHE_NAME = 'faraway-v[\d.]+';/,
+  `const CACHE_NAME = 'faraway-v${version}';`
+);
+swContent = swContent.replace(
+  /const STATIC_CACHE = 'faraway-static-v[\d.]+';/,
+  `const STATIC_CACHE = 'faraway-static-v${version}';`
+);
+swContent = swContent.replace(
+  /const DYNAMIC_CACHE = 'faraway-dynamic-v[\d.]+';/,
+  `const DYNAMIC_CACHE = 'faraway-dynamic-v${version}';`
+);
+swContent = swContent.replace(
+  /const MODELS_CACHE = 'faraway-models-v[\d.]+';/,
+  `const MODELS_CACHE = 'faraway-models-v${version}';`
+);
+
+fs.writeFileSync(swPath, swContent, 'utf8');
+
+console.log(`✅ Version mise à jour vers ${version} (environments + service worker)`);
