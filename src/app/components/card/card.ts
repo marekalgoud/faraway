@@ -1,5 +1,5 @@
-import { Component, signal, ElementRef, input, computed, output, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, signal, ElementRef, input, computed, output, inject, viewChild, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
@@ -23,6 +23,7 @@ interface ElementDetection {
 })
 export class Card {
   private formatterService = inject(FormatterService);
+  private destroyRef = inject(DestroyRef);
 
   cardForm = input.required<FormGroup>();
   cardUrl = input.required<string|null>();
@@ -70,13 +71,25 @@ export class Card {
   });
 
   // Signal to reflect current color control value
-  private selectedColor = computed(() => {
-    const fg = this.cardForm();
-    if (!fg) return '';
-    const ctrl = fg.get('color') as FormControl | null;
-    if (!ctrl) return '';
-    return toSignal(ctrl.valueChanges, { initialValue: ctrl.value || '' })() || '';
-  });
+  private selectedColor = signal<string>('');
+
+  constructor() {
+    // Synchroniser selectedColor avec le FormControl
+    effect(() => {
+      const fg = this.cardForm();
+      if (!fg) return;
+      const ctrl = fg.get('color') as FormControl | null;
+      if (ctrl) {
+        this.selectedColor.set(ctrl.value || '');
+        // S'abonner aux changements avec nettoyage automatique
+        ctrl.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(value => {
+            this.selectedColor.set(value || '');
+          });
+      }
+    });
+  }
 
   // Helpers pour accéder facilement aux parties du formulaire
   get optionsArray(): FormArray<FormControl<string|null>> {

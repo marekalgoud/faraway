@@ -1,6 +1,6 @@
-description: Ultralytics YOLO11s model trained on /content/datasets/Faraway.v16i.yolov12/data.yaml
+description: Ultralytics YOLO11s model trained on /content/datasets/Faraway.v19i.yolov11/data.yaml
 author: Ultralytics
-date: '2025-12-07T09:20:21.791828'
+date: '2025-12-09T18:17:45.310301'
 version: 8.3.228
 license: AGPL-3.0 License (https://ultralytics.com/license)
 docs: https://docs.ultralytics.com

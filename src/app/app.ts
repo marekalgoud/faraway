@@ -1,12 +1,13 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TensorflowService } from './services/tensorFlow.service';
 import { PwaService } from './services/pwa.service';
 import { Footer } from './components/footer/footer';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Footer],
+  imports: [RouterOutlet, Footer, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -23,7 +24,12 @@ export class App implements OnInit {
   // Exposer les signaux PWA
   protected canInstall = this.pwaService.canInstall;
   protected isOnline = this.pwaService.isOnline;
-  protected updateAvailable = this.pwaService.updateAvailable;
+  protected isStandalone = this.pwaService.isStandalone;
+  
+  // Afficher la bannière de mise à jour uniquement si l'app est installée en PWA
+  protected showUpdateBanner = computed(() => 
+    this.pwaService.updateAvailable() && this.pwaService.isStandalone()
+  );
   
   showInstallBanner = signal(false);
 

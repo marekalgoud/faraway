@@ -20,6 +20,15 @@ const translations: Record<Language, Translations> = {
       save: 'Enregistrer',
       close: 'Fermer'
     },
+    pwa: {
+      offlineMode: 'Mode hors ligne - Certaines fonctionnalités peuvent être limitées',
+      updateAvailable: 'Mise à jour disponible !',
+      updateNow: 'Mettre à jour maintenant',
+      installTitle: 'Installer Faraway',
+      installDesc: 'Accès rapide et utilisation hors ligne !',
+      install: 'Installer',
+      loadingModels: 'Chargement des modèles IA'
+    },
     footer: {
       version: 'v'
     },
@@ -239,6 +248,15 @@ const translations: Record<Language, Translations> = {
       delete: 'Delete',
       save: 'Save',
       close: 'Close'
+    },
+    pwa: {
+      offlineMode: 'Offline mode - Some features may be limited',
+      updateAvailable: 'Update available!',
+      updateNow: 'Update now',
+      installTitle: 'Install Faraway',
+      installDesc: 'Quick access and offline use!',
+      install: 'Install',
+      loadingModels: 'Loading AI models'
     },
     footer: {
       version: 'v'

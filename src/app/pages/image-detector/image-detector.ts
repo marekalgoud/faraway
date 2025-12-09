@@ -92,7 +92,7 @@ export class ImageDetectorComponent implements OnInit {
   private readonly CARD_MODEL_NAME = 'CARD_MODEL';
   private readonly TEMPLE_MODEL_NAME = 'TEMPLE_MODEL';
   private readonly ANALYSIS_THRESHOLD = 0.15;
-  private readonly SCENE_SCORE_THRESHOLD = 0.2;
+  private readonly SCENE_SCORE_THRESHOLD = 0.5;
   private readonly CLASS_CARD_ID = 0;
   private readonly CLASS_TEMPLE_ID = 1;
 

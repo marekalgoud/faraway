@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed, output, input, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, computed, output, input, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // NOUVEAUX Imports pour Reactive Forms
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl } from '@angular/forms';
@@ -19,6 +19,7 @@ import { FormatterService } from '../../services/formatter.service';
 })
 export class Temple {
   private formatterService = inject(FormatterService);
+  private destroyRef = inject(DestroyRef);
   
   // Le FormGroup est maintenant passé en input signal
   templeForm = input.required<FormGroup>();
@@ -38,13 +39,7 @@ export class Temple {
     'yellow': 'bg-yellow-100',
   };
   // reactive color signal
-  private selectedColor = computed(() => {
-    const form = this.templeForm();
-    if (!form) return '';
-    const ctrl = form.get('color') as FormControl | null;
-    if (!ctrl) return '';
-    return toSignal(ctrl.valueChanges, { initialValue: ctrl.value || '' })() || '';
-  });
+  private selectedColor = signal<string>('');
 
   templeBgClass = computed(() => {
     const color = this.selectedColor();
@@ -52,6 +47,24 @@ export class Temple {
     const normalizedColor = this.formatterService.formatLabel(color, 'temple').toLowerCase();
     return this.colorBgMap[normalizedColor] || 'bg-gray-200';
   });
+
+  constructor() {
+    // Synchroniser selectedColor avec le FormControl
+    effect(() => {
+      const form = this.templeForm();
+      if (!form) return;
+      const ctrl = form.get('color') as FormControl | null;
+      if (ctrl) {
+        this.selectedColor.set(ctrl.value || '');
+        // S'abonner aux changements avec nettoyage automatique
+        ctrl.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(value => {
+            this.selectedColor.set(value || '');
+          });
+      }
+    });
+  }
 
   // Listes des options pour les <select> du template
   colorOptions = TEMPLE_COLOR_CLASSES;
