@@ -1,7 +1,7 @@
-const CACHE_NAME = 'faraway-v2';
-const STATIC_CACHE = 'faraway-static-v2';
-const DYNAMIC_CACHE = 'faraway-dynamic-v2';
-const MODELS_CACHE = 'faraway-models-v2';
+const CACHE_NAME = 'faraway-v1.0.1';
+const STATIC_CACHE = 'faraway-static-v1.0.1';
+const DYNAMIC_CACHE = 'faraway-dynamic-v1.0.1';
+const MODELS_CACHE = 'faraway-models-v1.0.1';
 
 // Assets à mettre en cache au premier chargement
 const STATIC_ASSETS = [

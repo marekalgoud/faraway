@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.0.1 (2025-12-09)
+
+
+### Bug Fixes
+
+* ajout pollyfill ([9ae039f](https://github.com/marekalgoud/faraway/commit/9ae039fa48c20295e8024d45aed5af6e135c2ade))
+* correction build netlify ([b7ca7b2](https://github.com/marekalgoud/faraway/commit/b7ca7b23bdf7f99fd0819d3431ea9b6a0b9fe45f))
+* correction taille canvas pour prise de photo ([5b02c31](https://github.com/marekalgoud/faraway/commit/5b02c3111b66667fd8934048fb594e33d170f85a))
+* favicon ([615e134](https://github.com/marekalgoud/faraway/commit/615e13441f79c6a50f057195062dff6ba0e9265b))
+* suppression TU sur release ([ebf653c](https://github.com/marekalgoud/faraway/commit/ebf653c1e02fe9468ff1916bbdeabc76b34b3de1))
+
+
+### Features
+
+* ajout de l'image de démo ([97c587f](https://github.com/marekalgoud/faraway/commit/97c587f5a87f6050b0eabb54498a10aaadc2dc7e))
+* ajout mode PWA ([af7ac80](https://github.com/marekalgoud/faraway/commit/af7ac80cd2b51773eae8a72a1c61476d678d0932))
+* maj du favicon ([8dedbf1](https://github.com/marekalgoud/faraway/commit/8dedbf1e46efb556dabe22c93bece598850195dc))
+* maj du modele des temples ([eb3c8ec](https://github.com/marekalgoud/faraway/commit/eb3c8ec33816e8641d74539c6de7567ed05ac823))
+* maj modele carte ([3aec792](https://github.com/marekalgoud/faraway/commit/3aec79264c444afbeee65073e2262870a407674f))
+* maj modele des cartes ([db00fe4](https://github.com/marekalgoud/faraway/commit/db00fe4cf3e3a8a85950577b3bff11bfa2789318))
+* maj modele pour les cartes ([b3f5380](https://github.com/marekalgoud/faraway/commit/b3f53802fd8c682bfd6f23522c2dbbda0ca040cd))
+* mise en forme détail calcul ([bb2e7c8](https://github.com/marekalgoud/faraway/commit/bb2e7c8e053bc01c5ea7e967bcba2c9ac2dab3b3))
+* mise en place de la traduction ([ee84fe7](https://github.com/marekalgoud/faraway/commit/ee84fe77e1279d6f15e859848a70e73e29453784))
+* mise en place de release-it ([8706dd7](https://github.com/marekalgoud/faraway/commit/8706dd7e7279b57258fef265b58cbccd88b4a519))
+* mise en place du footer ([739ed0d](https://github.com/marekalgoud/faraway/commit/739ed0d7c5896b0f0dacf0926a715733022c763c))
+
 Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
