@@ -100,6 +100,14 @@ export class ImageDetectorComponent implements OnInit {
     // Les modèles sont chargés au démarrage de l'application
     this.isLoading.set(false);
     this.loadingMessage.set("Prêt à détecter.");
+    
+    // Calculer automatiquement le score à chaque modification du formulaire
+    this.detectorForm.valueChanges.subscribe(() => {
+      // Vérifier qu'il y a au moins une carte ou un temple
+      if (this.cardsFormArray.length > 0 || this.templesFormArray.length > 0) {
+        this.calculateScore();
+      }
+    });
   }
 
   // --- (Helpers pour le template inchangés) ---
@@ -531,9 +539,12 @@ export class ImageDetectorComponent implements OnInit {
     } else {
       this.croppedTemples.set(analysisResults);
     }
+    
+    // Calculer automatiquement le score après l'analyse
+    this.calculateScore();
   }
 
-  protected calculateScore() {
+  private calculateScore() {
     // Obtenir les valeurs brutes des formulaires
     const allCards = this.cardsFormArray.getRawValue();
     const allTemples = this.templesFormArray.getRawValue();

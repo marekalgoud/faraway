@@ -47,9 +47,30 @@ self.addEventListener('install', (event) => {
     Promise.all([
       // Cache des assets statiques
       caches.open(STATIC_CACHE)
-        .then((cache) => {
+        .then(async (cache) => {
           console.log('[SW] Mise en cache des assets statiques');
-          return cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' })));
+          // D'abord mettre en cache les assets de base
+          await cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' })));
+          
+          // Ensuite, charger index.html et extraire tous les fichiers JS/CSS
+          try {
+            const indexResponse = await fetch('/index.html', { cache: 'reload' });
+            const indexText = await indexResponse.text();
+            
+            // Extraire tous les fichiers .js et .css depuis l'HTML
+            const jsFiles = [...indexText.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
+            const cssFiles = [...indexText.matchAll(/href="([^"]+\.css)"/g)].map(m => m[1]);
+            const allFiles = [...jsFiles, ...cssFiles].filter(f => !f.startsWith('http'));
+            
+            console.log('[SW] Fichiers Angular détectés:', allFiles);
+            
+            // Mettre en cache tous les fichiers Angular
+            if (allFiles.length > 0) {
+              await cache.addAll(allFiles.map(url => new Request(url, { cache: 'reload' })));
+            }
+          } catch (err) {
+            console.error('[SW] Erreur lors de l\'extraction des fichiers Angular:', err);
+          }
         })
         .catch((err) => {
           console.error('[SW] Erreur lors de la mise en cache des assets statiques:', err);
@@ -137,6 +158,35 @@ self.addEventListener('fetch', (event) => {
           return caches.open(STATIC_CACHE).then((cache) => {
             cache.put(request, response.clone());
             return response;
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // Stratégie Cache First pour les fichiers JS/CSS de l'application Angular
+  if (url.pathname.match(/\.(js|css)$/)) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          console.log('[SW] Fichier JS/CSS servi depuis le cache:', url.pathname);
+          return response;
+        }
+        console.log('[SW] Fichier JS/CSS récupéré depuis le réseau:', url.pathname);
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            return caches.open(STATIC_CACHE).then((cache) => {
+              cache.put(request, response.clone());
+              return response;
+            });
+          }
+          return response;
+        }).catch(() => {
+          console.error('[SW] Impossible de récupérer le fichier:', url.pathname);
+          return new Response('Fichier non disponible hors ligne', {
+            status: 503,
+            statusText: 'Service Unavailable'
           });
         });
       })

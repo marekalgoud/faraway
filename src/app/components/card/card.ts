@@ -66,8 +66,9 @@ export class Card {
   cardBgClass = computed(() => {
     const color = this.selectedColor();
     if (!color) return 'bg-gray-200';
-    const normalizedColor = this.formatterService.formatLabel(color, 'card').toLowerCase();
-    return this.colorBgMap[normalizedColor] || 'bg-gray-200';
+    // Extraire le nom de couleur depuis 'card_blue' -> 'blue'
+    const colorName = color.replace('card_', '').toLowerCase();
+    return this.colorBgMap[colorName] || 'bg-gray-200';
   });
 
   // Signal to reflect current color control value
