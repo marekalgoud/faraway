@@ -120,7 +120,17 @@ export class PwaService {
     if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.getRegistration();
       if (registration && registration.waiting) {
+        // Écouter quand le nouveau service worker prend le contrôle
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('[PWA] Nouveau service worker actif, rechargement...');
+          window.location.reload();
+        });
+        
+        // Envoyer le message au service worker en attente
+        console.log('[PWA] Envoi du message SKIP_WAITING au service worker');
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        console.log('[PWA] Aucun service worker en attente, rechargement forcé');
         window.location.reload();
       }
     }
