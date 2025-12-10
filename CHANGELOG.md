@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/marekalgoud/faraway/compare/v1.0.3...v1.0.4) (2025-12-10)
+
+
+### Bug Fixes
+
+* correction action maj mode PWA ([87ba47e](https://github.com/marekalgoud/faraway/commit/87ba47ee26e1a4ef3aecea3d576dc912ae99f3be))
+
 ## [1.0.3](https://github.com/marekalgoud/faraway/compare/v1.0.2...v1.0.3) (2025-12-10)
 
 
