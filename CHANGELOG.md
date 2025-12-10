@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/marekalgoud/faraway/compare/v1.0.4...v1.0.5) (2025-12-10)
+
+
+### Bug Fixes
+
+* deplacement de l'affichage du résultat au dessus du tableau ([d6cfb8c](https://github.com/marekalgoud/faraway/commit/d6cfb8c41bf575ffb2b11797e281eb1c7cccdc5d))
+
 ## [1.0.4](https://github.com/marekalgoud/faraway/compare/v1.0.3...v1.0.4) (2025-12-10)
 
 
