@@ -11,7 +11,8 @@ const STATIC_ASSETS = [
   '/favicon.ico',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
-  '/apple-touch-icon.png'
+  '/apple-touch-icon.png',
+  '/images/demo.jpg'
 ];
 
 // Modèles TensorFlow à mettre en cache (critiques pour l'application)
@@ -62,11 +63,14 @@ self.addEventListener('install', (event) => {
             const cssFiles = [...indexText.matchAll(/href="([^"]+\.css)"/g)].map(m => m[1]);
             const allFiles = [...jsFiles, ...cssFiles].filter(f => !f.startsWith('http'));
             
-            console.log('[SW] Fichiers Angular détectés:', allFiles);
+            // Éliminer les doublons
+            const uniqueFiles = [...new Set(allFiles)];
+            
+            console.log('[SW] Fichiers Angular détectés:', uniqueFiles);
             
             // Mettre en cache tous les fichiers Angular
-            if (allFiles.length > 0) {
-              await cache.addAll(allFiles.map(url => new Request(url, { cache: 'reload' })));
+            if (uniqueFiles.length > 0) {
+              await cache.addAll(uniqueFiles.map(url => new Request(url, { cache: 'reload' })));
             }
           } catch (err) {
             console.error('[SW] Erreur lors de l\'extraction des fichiers Angular:', err);
