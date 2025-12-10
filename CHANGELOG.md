@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/marekalgoud/faraway/compare/v1.0.2...v1.0.3) (2025-12-10)
+
+
+### Bug Fixes
+
+* correction mode hors ligne ([e7cdd65](https://github.com/marekalgoud/faraway/commit/e7cdd654be713e2f284fd0072cf7d6304e41a213))
+
 ## [1.0.2](https://github.com/marekalgoud/faraway/compare/v1.0.1...v1.0.2) (2025-12-10)
 
 
