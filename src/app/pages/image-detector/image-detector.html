@@ -237,6 +237,12 @@
           <div class="mt-12 pt-6 border-t">
             <!-- Zone d'affichage des résultats -->
             @if (scoreRounds().length > 0) {
+              <!-- Score total -->
+                <div class="">
+                  <h2 class="font-heading uppercase text-xl font-semibold text-indigo-800 text-center">
+                    {{ 'imageDetector.totalScore' | translate }} :&nbsp;&nbsp;<span class="text-green-500 text-4xl">{{ totalScore() }}</span>
+                  </h2>
+                </div>
               <div class="mt-6 bg-gray-800 rounded-lg shadow-inner overflow-hidden">
                 <h3 class="font-heading uppercase text-lg font-semibold text-green-300 p-4 pb-3">{{ 'imageDetector.calculationDetails' | translate }}</h3>
                 
@@ -262,12 +268,7 @@
                   </table>
                 </div>
                 
-                <!-- Score total -->
-                <div class="bg-gray-900 p-4 border-t-2 border-green-500">
-                  <h2 class="font-heading uppercase text-2xl font-bold text-white text-center">
-                    {{ 'imageDetector.totalScore' | translate }}: <span class="text-green-400">{{ totalScore() }}</span>
-                  </h2>
-                </div>
+                
               </div>
             }
           </div>
