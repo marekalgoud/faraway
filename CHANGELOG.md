@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/marekalgoud/faraway/compare/v1.0.1...v1.0.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* correction bg color + fix mode hors ligne ([727f562](https://github.com/marekalgoud/faraway/commit/727f562a4d0608387183dd657ad33dc593356456))
+
 ## 1.0.1 (2025-12-09)
 
 
