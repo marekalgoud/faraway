@@ -1,17 +1,14 @@
 import { Component, ElementRef, OnInit, inject, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA, viewChild } from '@angular/core';
-// ... (imports inchangés)
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Card } from '../../components/card/card';
 import { Temple } from '../../components/temple/temple';
 import { TensorflowService, DetectionResult } from '../../services/tensorFlow.service';
 import { CommonModule } from '@angular/common';
-// NOUVEAU: Import du service de calcul
 import { ScoreCalculatorService } from '../../services/scoreCalculator.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 
-// NOUVEAU: Import des constantes
 import {
   SCENE_CLASS_NAMES,
   CARD_ELEMENT_CLASSES,
@@ -34,7 +31,6 @@ interface CroppedFormItem {
 
 @Component({
   selector: 'app-image-detector',
-  // ... (imports, changeDetection, templateUrl, styles inchangés)
   imports: [CommonModule, ReactiveFormsModule, Card, Temple, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './image-detector.html',
@@ -42,7 +38,6 @@ interface CroppedFormItem {
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ImageDetectorComponent implements OnInit {
-  // ... (ViewChilds, injections inchangés)
   imageRef = viewChild.required<ElementRef<HTMLImageElement>>('imageElement');
   canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   videoRef = viewChild<ElementRef<HTMLVideoElement>>('videoElement');
@@ -206,10 +201,8 @@ export class ImageDetectorComponent implements OnInit {
             }
           });
           usedResolution = resolution.name;
-          console.log(`Caméra démarrée en ${resolution.name} (${resolution.width}×${resolution.height})`);
           break;
         } catch (e) {
-          console.log(`Résolution ${resolution.name} non disponible, essai suivant...`);
           continue;
         }
       }
@@ -221,29 +214,14 @@ export class ImageDetectorComponent implements OnInit {
       this.cameraStream.set(stream);
       this.isCameraActive.set(true);
 
-      // Attendre que la vidéo soit prête et afficher la résolution réelle
+      // Attacher le stream à la vidéo
       setTimeout(() => {
         const videoElement = this.videoRef();
         if (videoElement) {
-          const video = videoElement.nativeElement;
-          video.srcObject = stream;
-          
-          video.onloadedmetadata = () => {
-            const actualWidth = video.videoWidth;
-            const actualHeight = video.videoHeight;
-            console.log(`Résolution réelle obtenue: ${actualWidth}×${actualHeight}`);
-            
-            // Afficher un message informatif à l'utilisateur
-            if (actualWidth >= 3840) {
-              console.log('✅ Qualité 4K+ détectée - Excellente pour la détection');
-            } else if (actualWidth >= 1920) {
-              console.log('✅ Qualité Full HD détectée - Bonne pour la détection');
-            }
-          };
+          videoElement.nativeElement.srcObject = stream;
         }
       }, 100);
     } catch (error) {
-      console.error('Erreur d\'accès à la caméra:', error);
       this.errorMessage.set('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
       this.isCameraActive.set(false);
     }
@@ -490,7 +468,6 @@ export class ImageDetectorComponent implements OnInit {
       }
 
     } catch (error) {
-      console.error("Erreur critique lors de la détection:", error);
       this.loadingMessage.set("Erreur de détection.");
     } finally {
       this.isLoading.set(false);
@@ -624,7 +601,6 @@ export class ImageDetectorComponent implements OnInit {
         if (!className) continue;
 
         this.loadingMessage.set(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
-        console.log(`temple - element trouvé : ${className} (confiance : ${Math.round(score * 100)}%)`);
         if (isTempleColor(className) && score > bestColorScore) {
           bestColor = className;
           bestColorScore = score;
@@ -639,8 +615,6 @@ export class ImageDetectorComponent implements OnInit {
         }
       }
     }
-
-    console.log(bestColor, bestValue, bestMultiplier, foundOptions);
 
     return this.fb.group({
       color: [bestColor],

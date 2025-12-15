@@ -52,10 +52,8 @@ export class TensorflowService {
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
         this.loadingMessage.set(`Chargement ${modelName}...`);
-        console.log(`Chargement du modèle '${modelName}' depuis:`, modelUrl);
         const model = await tf.loadGraphModel(modelUrl);
         this.models.set(modelName, model);
-        console.log(`Modèle '${modelName}' chargé.`);
 
         this.loadingMessage.set(`Initialisation ${modelName}...`);
         // Échauffement (Warmup)
@@ -64,12 +62,10 @@ export class TensorflowService {
           model.execute(dummyInput);
         });
 
-        console.log(`Modèle '${modelName}' prêt.`);
         this.loadedModels++;
         this.loadingProgress.set(Math.round((this.loadedModels / this.totalModels) * 100));
         resolve();
       } catch (error) {
-        console.error(`Erreur lors du chargement du modèle '${modelName}':`, error);
         reject(error);
       } finally {
         this.loadingPromises.delete(modelName);
@@ -271,7 +267,6 @@ export class TensorflowService {
       return result;
 
     } catch (e) {
-      console.error("Erreur dans processYoloOutput", e);
       tf.dispose(intermediates);
       throw e;
     }
@@ -283,7 +278,6 @@ export class TensorflowService {
   public async detect(sourceElement: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement, scoreThreshold: number, modelName: string, inputSize: number = 640): Promise<DetectionResult | null> {
     const model = this.models.get(modelName);
     if (!model) {
-      console.error(`Erreur: Le modèle '${modelName}' n'est pas chargé.`);
       return null;
     }
 
@@ -319,7 +313,6 @@ export class TensorflowService {
       const processedResults = await this.processYoloOutput(outputTensor, scoreThreshold, inputSize, letterboxParams, originalWidth!, originalHeight!);
       return processedResults;
     } catch (e) {
-      console.error("Échec du traitement des résultats YOLO.", e);
       return null;
     } finally {
       tf.dispose(outputTensor);

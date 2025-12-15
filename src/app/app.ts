@@ -42,16 +42,11 @@ export class App implements OnInit {
 
   ngOnInit() {
     // Chargement des modèles en tâche de fond au démarrage de l'application
-    console.log('Chargement des modèles TensorFlow en arrière-plan...');
     this.tfService.loadModels([
       { url: this.SCENE_MODEL_PATH, name: this.SCENE_MODEL_NAME, size: 640 },
       { url: this.CARD_MODEL_PATH, name: this.CARD_MODEL_NAME, size: 640 },
       { url: this.TEMPLE_MODEL_PATH, name: this.TEMPLE_MODEL_NAME, size: 640 }
-    ]).then(() => {
-      console.log('Tous les modèles TensorFlow sont chargés et prêts.');
-    }).catch(err => {
-      console.error('Erreur lors du chargement des modèles:', err);
-    });
+    ]);
     
     // Afficher la bannière d'installation après 30 secondes si disponible
     setTimeout(() => {

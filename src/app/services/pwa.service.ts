@@ -34,8 +34,6 @@ export class PwaService {
         const registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/'
         });
-        
-        console.log('[PWA] Service Worker enregistré:', registration.scope);
 
         // Vérifier les mises à jour
         registration.addEventListener('updatefound', () => {
@@ -43,7 +41,6 @@ export class PwaService {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[PWA] Mise à jour disponible');
                 this.updateAvailable.set(true);
               }
             });
@@ -55,8 +52,8 @@ export class PwaService {
           registration.update();
         }, 60 * 60 * 1000);
 
-      } catch (error) {
-        console.error('[PWA] Erreur lors de l\'enregistrement du Service Worker:', error);
+      } catch {
+        // Ignorer les erreurs d'enregistrement
       }
     }
   }
@@ -66,12 +63,10 @@ export class PwaService {
    */
   private setupOnlineListener() {
     window.addEventListener('online', () => {
-      console.log('[PWA] Connexion rétablie');
       this.isOnline.set(true);
     });
 
     window.addEventListener('offline', () => {
-      console.log('[PWA] Connexion perdue');
       this.isOnline.set(false);
     });
   }
@@ -84,11 +79,9 @@ export class PwaService {
       e.preventDefault();
       this.deferredPrompt = e;
       this.canInstall.set(true);
-      console.log('[PWA] Installation disponible');
     });
 
     window.addEventListener('appinstalled', () => {
-      console.log('[PWA] Application installée');
       this.canInstall.set(false);
       this.deferredPrompt = null;
     });
@@ -105,8 +98,6 @@ export class PwaService {
     this.deferredPrompt.prompt();
     const { outcome } = await this.deferredPrompt.userChoice;
     
-    console.log('[PWA] Résultat de l\'installation:', outcome);
-    
     this.deferredPrompt = null;
     this.canInstall.set(false);
 
@@ -122,15 +113,12 @@ export class PwaService {
       if (registration && registration.waiting) {
         // Écouter quand le nouveau service worker prend le contrôle
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('[PWA] Nouveau service worker actif, rechargement...');
           window.location.reload();
         });
         
         // Envoyer le message au service worker en attente
-        console.log('[PWA] Envoi du message SKIP_WAITING au service worker');
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       } else {
-        console.log('[PWA] Aucun service worker en attente, rechargement forcé');
         window.location.reload();
       }
     }
@@ -141,7 +129,6 @@ export class PwaService {
    */
   async requestNotificationPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      console.warn('[PWA] Notifications non supportées');
       return false;
     }
 
