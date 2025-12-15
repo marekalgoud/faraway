@@ -1,6 +1,6 @@
 // Ce fichier est généré automatiquement par le build
 // Ne pas le modifier manuellement
 export const environment = {
-  version: '1.0.7',
+  version: '1.0.8',
   production: true
 };

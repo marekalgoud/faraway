@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8](https://github.com/marekalgoud/faraway/compare/v1.0.7...v1.0.8) (2025-12-15)
+
+
+### Features
+
+* maj du modele de detection des cartes temples ([f259354](https://github.com/marekalgoud/faraway/commit/f259354caa070ab04f955347d8290522430d5ad6))
+
 ## [1.0.7](https://github.com/marekalgoud/faraway/compare/v1.0.6...v1.0.7) (2025-12-15)
 
 
