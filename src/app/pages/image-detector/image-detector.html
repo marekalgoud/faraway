@@ -37,7 +37,10 @@
             (click)="loadDemoImage()"
             [disabled]="isLoading()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-            [ngClass]="{'bg-cyan-600 hover:bg-cyan-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
+            [class.bg-cyan-600]="!isLoading()"
+            [class.hover:bg-cyan-700]="!isLoading()"
+            [class.bg-gray-400]="isLoading()"
+            [class.cursor-not-allowed]="isLoading()"
             >
             🖼️ {{ 'imageDetector.demoImage' | translate }}
           </button>
@@ -46,7 +49,10 @@
             (click)="startCamera()"
             [disabled]="isLoading()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-            [ngClass]="{'bg-purple-600 hover:bg-purple-700': !isLoading(), 'bg-gray-400 cursor-not-allowed': isLoading()}"
+            [class.bg-purple-600]="!isLoading()"
+            [class.hover:bg-purple-700]="!isLoading()"
+            [class.bg-gray-400]="isLoading()"
+            [class.cursor-not-allowed]="isLoading()"
             >
             📷 {{ 'imageDetector.openCamera' | translate }}
           </button>
@@ -77,7 +83,10 @@
             (click)="detectImage()"
             [disabled]="!imageSelected() || isLoading()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-            [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+            [class.bg-indigo-600]="imageSelected()"
+            [class.hover:bg-indigo-700]="imageSelected()"
+            [class.bg-gray-400]="!imageSelected()"
+            [class.cursor-not-allowed]="!imageSelected()"
             >
             {{ 'imageDetector.detectObjects' | translate }}
           </button>
@@ -86,7 +95,10 @@
             (click)="rotateImage()"
             [disabled]="!imageSelected()"
             class="w-full sm:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-150"
-            [ngClass]="{'bg-amber-600 hover:bg-amber-700': imageSelected(), 'bg-gray-400 cursor-not-allowed': !imageSelected()}"
+            [class.bg-amber-600]="imageSelected()"
+            [class.hover:bg-amber-700]="imageSelected()"
+            [class.bg-gray-400]="!imageSelected()"
+            [class.cursor-not-allowed]="!imageSelected()"
             title="Rotate image 90° clockwise"
             >
             ↻ {{ 'imageDetector.rotation' | translate }}
@@ -98,7 +110,7 @@
       @if (isLoading()) {
         <div
           class="flex flex-col items-center justify-center bg-white bg-opacity-80 py-4">
-          <div class="loader text-indigo-700 text-xl mb-4"></div>
+          <div class="w-10 h-10 border-8 border-gray-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
           <p class="text-indigo-700 text-sm font-medium">{{ loadingMessage() }}</p>
         </div>
       }
@@ -117,23 +129,24 @@
 
       <!-- Caméra en plein écran -->
       @if (isCameraActive()) {
-        <div class="camera-fullscreen">
+        <div class="fixed inset-0 z-50">
           <video #videoElement
             autoplay
             playsinline
+            class="w-full h-full object-cover"
             ></video>
-          <div class="camera-controls">
+          <div class="absolute bottom-0 left-0 right-0 p-8 pb-4 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-4">
             <button
               type="button"
               (click)="capturePhoto()"
-              class="px-8 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150"
+              class="px-8 py-4 text-lg rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150 shadow-lg"
               >
               📸 Capturer
             </button>
             <button
               type="button"
               (click)="stopCamera()"
-              class="px-8 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition duration-150"
+              class="px-8 py-4 text-lg rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition duration-150 shadow-lg"
               >
               ✕ Fermer
             </button>
@@ -151,13 +164,13 @@
 
           <!-- Canvas pour l'image uploadée ou capturée -->
           <canvas #canvas
-            class="preview-canvas w-full h-auto block"
+            class="w-full h-auto block transition-opacity duration-[260ms] ease-in-out"
             [style.opacity]="imageUrl() ? '1' : '0'"
             ></canvas>
 
           <!-- Placeholder -->
           @if (!imageUrl()) {
-            <div class=" p-6 placeholder absolute inset-0 flex items-center justify-center text-gray-500">
+            <div class="p-6 absolute inset-0 flex items-center justify-center text-gray-500 transition-opacity duration-200 ease-in-out pointer-events-none">
               Veuillez sélectionner une image ou ouvrir la caméra.
             </div>
           }

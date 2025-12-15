@@ -11,7 +11,6 @@ import { FormatterService } from '../../services/formatter.service';
 
 @Component({
   selector: 'app-temple',
-  standalone: true,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './temple.html',
   styles: [],

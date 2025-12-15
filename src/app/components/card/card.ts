@@ -15,7 +15,6 @@ interface ElementDetection {
 
 @Component({
   selector: 'app-card',
-  standalone: true,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './card.html',
   styles: [],

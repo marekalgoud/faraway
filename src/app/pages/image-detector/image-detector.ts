@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, inject, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA, viewChild } from '@angular/core';
 // ... (imports inchangés)
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,14 +15,6 @@ import { TranslationService } from '../../services/translation.service';
 import {
   SCENE_CLASS_NAMES,
   CARD_ELEMENT_CLASSES,
-  CARD_COLOR_CLASSES,
-  CARD_VALUE_CLASSES,
-  CARD_CONDITION_CLASSES,
-  CARD_OPTION_CLASSES,
-  CARD_MULTIPLIER_CLASSES,
-  TEMPLE_COLOR_CLASSES,
-  TEMPLE_VALUE_CLASSES,
-  TEMPLE_MULTIPLIER_CLASSES,
   TEMPLE_ELEMENT_CLASSES_MAPPING,
   isCardColor,
   isCardValue,
@@ -43,7 +35,6 @@ interface CroppedFormItem {
 @Component({
   selector: 'app-image-detector',
   // ... (imports, changeDetection, templateUrl, styles inchangés)
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, Card, Temple, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './image-detector.html',
@@ -52,9 +43,9 @@ interface CroppedFormItem {
 })
 export class ImageDetectorComponent implements OnInit {
   // ... (ViewChilds, injections inchangés)
-  @ViewChild('imageElement') imageRef!: ElementRef<HTMLImageElement>;
-  @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('videoElement') videoRef?: ElementRef<HTMLVideoElement>;
+  imageRef = viewChild.required<ElementRef<HTMLImageElement>>('imageElement');
+  canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  videoRef = viewChild<ElementRef<HTMLVideoElement>>('videoElement');
 
   private tfService = inject(TensorflowService);
   private fb = inject(FormBuilder);
@@ -133,8 +124,6 @@ export class ImageDetectorComponent implements OnInit {
     if (!arr || !arr[index]) return '';
     return arr[index].url || '';
   }
-
-
 
   /**
    * Charge l'image de démonstration.
@@ -234,8 +223,9 @@ export class ImageDetectorComponent implements OnInit {
 
       // Attendre que la vidéo soit prête et afficher la résolution réelle
       setTimeout(() => {
-        if (this.videoRef) {
-          const video = this.videoRef.nativeElement;
+        const videoElement = this.videoRef();
+        if (videoElement) {
+          const video = videoElement.nativeElement;
           video.srcObject = stream;
           
           video.onloadedmetadata = () => {
@@ -269,8 +259,9 @@ export class ImageDetectorComponent implements OnInit {
       this.cameraStream.set(undefined);
     }
     this.isCameraActive.set(false);
-    if (this.videoRef) {
-      this.videoRef.nativeElement.srcObject = null;
+    const videoElement = this.videoRef();
+    if (videoElement) {
+      videoElement.nativeElement.srcObject = null;
     }
   }
 
@@ -278,9 +269,10 @@ export class ImageDetectorComponent implements OnInit {
    * Capture une photo depuis la caméra.
    */
   capturePhoto() {
-    if (!this.videoRef || !this.isCameraActive()) return;
+    const videoElement = this.videoRef();
+    if (!videoElement || !this.isCameraActive()) return;
 
-    const video = this.videoRef.nativeElement;
+    const video = videoElement.nativeElement;
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -308,8 +300,8 @@ export class ImageDetectorComponent implements OnInit {
    * Ajuste le canvas lorsque l'image est chargée.
    */
   onImageLoaded() {
-    const img = this.imageRef.nativeElement;
-    const canvas = this.canvasRef.nativeElement;
+    const img = this.imageRef().nativeElement;
+    const canvas = this.canvasRef().nativeElement;
 
     // Draw rotated image preview on canvas
     this.drawImageOnCanvas(canvas, img, this.imageRotation());
@@ -369,8 +361,8 @@ export class ImageDetectorComponent implements OnInit {
 
     // Redraw the canvas with the new rotation
     if (this.imageUrl()) {
-      const img = this.imageRef.nativeElement;
-      const canvas = this.canvasRef.nativeElement;
+      const img = this.imageRef().nativeElement;
+      const canvas = this.canvasRef().nativeElement;
       this.drawImageOnCanvas(canvas, img, rotation);
     }
   }
@@ -425,7 +417,7 @@ export class ImageDetectorComponent implements OnInit {
    * Efface le canvas et les formulaires.
    */
   clearCanvas() {
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = this.canvasRef().nativeElement;
     const ctx = canvas.getContext('2d');
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -452,7 +444,7 @@ export class ImageDetectorComponent implements OnInit {
 
     try {
       // Get the image element and create a rotated canvas if needed
-      const imgElement = this.imageRef.nativeElement;
+      const imgElement = this.imageRef().nativeElement;
       const detectionCanvas = this.getRotatedCanvas(imgElement, this.imageRotation());
 
       // 1. Détection de scène (card, temple) - use the rotated canvas
@@ -657,11 +649,11 @@ export class ImageDetectorComponent implements OnInit {
       options: this.fb.array(foundOptions.map(opt => this.fb.control(opt)))
     });
   }  drawBoxes(results: DetectionResult) {
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = this.canvasRef().nativeElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     // Redraw the preview image onto the canvas (preserves image when drawing boxes)
-    this.drawImageOnCanvas(canvas, this.imageRef.nativeElement, this.imageRotation());
+    this.drawImageOnCanvas(canvas, this.imageRef().nativeElement, this.imageRotation());
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
 
@@ -700,7 +692,7 @@ export class ImageDetectorComponent implements OnInit {
 
   cropDetections(results: DetectionResult, targetClassId: number, sortLeftToRight: boolean, source?: HTMLImageElement | HTMLCanvasElement): { url: string, canvas: HTMLCanvasElement }[] {
     // Use provided source (rotated canvas) when available, otherwise fallback to original image element
-    const src = source || this.imageRef.nativeElement;
+    const src = source || this.imageRef().nativeElement;
     const imgWidth = (src as HTMLImageElement).naturalWidth || (src as HTMLCanvasElement).width;
     const imgHeight = (src as HTMLImageElement).naturalHeight || (src as HTMLCanvasElement).height;
     const detections = results.boxes
