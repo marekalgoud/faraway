@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.6](https://github.com/marekalgoud/faraway/compare/v1.0.5...v1.0.6) (2025-12-15)
+
+
+### Bug Fixes
+
+* correction affichage input sur certains mobiles ([8e9125a](https://github.com/marekalgoud/faraway/commit/8e9125ac0bc37e224a06d0c014eae2ae6e9c9b81))
+* correction du footer qui empiete sur la caméra ([f21fa61](https://github.com/marekalgoud/faraway/commit/f21fa6115ce39112032a7669b97df53f95bb827d))
+* image de partage sur les reseaux sociaux ([527f782](https://github.com/marekalgoud/faraway/commit/527f782460bbae6d904136bdd270c07185d9a9a7))
+
 ## [1.0.5](https://github.com/marekalgoud/faraway/compare/v1.0.4...v1.0.5) (2025-12-10)
 
 

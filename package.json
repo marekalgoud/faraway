@@ -1,6 +1,6 @@
 {
   "name": "faraway",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "ng": "ng",
     "prestart": "node scripts/update-version.js",
