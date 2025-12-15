@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/marekalgoud/faraway/compare/v1.0.6...v1.0.7) (2025-12-15)
+
+
+### Bug Fixes
+
+* améliorations mineures ([edcd1f3](https://github.com/marekalgoud/faraway/commit/edcd1f3d345ca5098b93a9f5c97e3151a0b644a3))
+
 ## [1.0.6](https://github.com/marekalgoud/faraway/compare/v1.0.5...v1.0.6) (2025-12-15)
 
 
