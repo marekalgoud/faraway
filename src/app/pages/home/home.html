@@ -42,13 +42,13 @@
                     [formControl]="control"
                     type="text"
                     [placeholder]="('home.playerPlaceholder' | translate) + ' ' + (i + 1)"
-                    class="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    class="flex-1 min-w-0 px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
                     >
                   @if (canRemovePlayer) {
                     <button
                       type="button"
                       (click)="removePlayer(i)"
-                      class="px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition duration-150"
+                      class="flex-shrink-0 px-3 py-2 sm:px-4 sm:py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition duration-150"
                       >
                       ✕
                     </button>
