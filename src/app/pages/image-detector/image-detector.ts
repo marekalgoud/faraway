@@ -264,7 +264,8 @@ export class ImageDetectorComponent implements OnInit {
     const imageDataUrl = canvas.toDataURL('image/jpeg', 0.98);
     this.imageUrl.set(imageDataUrl);
     this.imageSelected.set(true);
-    this.imageRotation.set(0);
+    // Appliquer automatiquement 3 rotations (270°) pour les photos en portrait
+    this.imageRotation.set(270);
 
     // Arrêter la caméra après capture
     this.stopCamera();
