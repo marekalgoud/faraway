@@ -1,7 +1,16 @@
 <footer class="fixed bottom-0 left-0 right-0 z-10 bg-gray-900 bg-opacity-90 backdrop-blur-sm border-t border-gray-700 py-3 px-4">
   <div class="max-w-7xl mx-auto flex items-center justify-between">
     <p class="text-gray-400 text-xs font-medium">
-      Faraway - score and image detection - v{{ version() }} • © {{ currentYear() }}
+      Faraway - score and image detection - 
+      <a 
+        href="https://github.com/marekalgoud/faraway/blob/main/CHANGELOG.md" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="text-blue-400 hover:text-blue-300 transition underline"
+      >
+        v{{ version() }}
+      </a>
+       • © {{ currentYear() }}
     </p>
     
     <!-- Language Selector -->
