@@ -1,5 +1,18 @@
 # Changelog
 
+# [1.1.0](https://github.com/marekalgoud/faraway/compare/v1.0.8...v1.1.0) (2025-12-23)
+
+
+### Bug Fixes
+
+* affiche la capture au format paysage par défaut ([a4c2e0d](https://github.com/marekalgoud/faraway/commit/a4c2e0d0c2b51f1defad3e5601c1f0c8c6ff614c))
+
+
+### Features
+
+* ajout lien dans le footer vers le changelog ([3d2c06a](https://github.com/marekalgoud/faraway/commit/3d2c06ac05844e43557717bfcc4f3ba3c0e002e5))
+* mise à jour du modele des temples ([766d5d0](https://github.com/marekalgoud/faraway/commit/766d5d0742e8e196fdeff2012dff2ed30c2e31df))
+
 ## [1.0.9](https://github.com/marekalgoud/faraway/compare/v1.0.8...v1.0.9) (2025-12-22)
 
 
